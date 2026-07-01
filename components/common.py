@@ -332,6 +332,8 @@ def output_filename_for_format(filename, format_mode):
         return f"{stem} - giay di cho.xlsx"
     if format_mode == APPROVAL_FORMAT_MODE:
         return f"{stem} - duyet dinh muc.xlsx"
+    if format_mode == "bizen_po":
+        return f"{stem} - bizen po.xlsx"
     return output_filename(filename)
 
 

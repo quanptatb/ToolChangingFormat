@@ -28,11 +28,18 @@ from components.common import (
     output_dir,
     APPROVAL_FORMAT_MODE,
 )
+from components.format_bizen_po import BIZEN_IDENTIFIER, BIZEN_FORMAT_MODE
 from components import (
     process_sheet_format1_a4,
     process_sheet_format2,
     process_sheet_approval,
+    process_sheet_bizen_po,
 )
+
+
+def _detect_bizen_file(filename):
+    """Trả về True nếu tên file chứa chuỗi nhận diện BIZEN PO Lưới."""
+    return BIZEN_IDENTIFIER in (filename or "")
 
 
 def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="format1", selected_kitchen=None):
@@ -43,6 +50,11 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
     suffix = Path(safe_name).suffix.lower()
     if suffix not in {".xlsx", ".xlsm", ".csv"}:
         raise ValueError("Vui lòng chọn file Excel .xlsx, .xlsm hoặc .csv.")
+
+    # Auto-detect BIZEN PO Lưới files by filename
+    if format_mode == "auto" or _detect_bizen_file(safe_name):
+        if _detect_bizen_file(safe_name):
+            format_mode = BIZEN_FORMAT_MODE
 
     if suffix == ".csv":
         from io import StringIO
@@ -56,7 +68,9 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
         workbook = load_workbook(BytesIO(file_bytes))
         worksheet = ensure_visible_worksheet(workbook, workbook.active)
 
-    if format_mode == "format2":
+    if format_mode == BIZEN_FORMAT_MODE:
+        workbook = process_sheet_bizen_po(worksheet)
+    elif format_mode == "format2":
         workbook = process_sheet_format2(worksheet, Path(safe_name), date_mode, selected_kitchen)
     elif format_mode == APPROVAL_FORMAT_MODE:
         workbook = process_sheet_approval(worksheet)
@@ -387,6 +401,7 @@ index_html = """<!doctype html>
               <option value="format1" selected>Format 1 (Bảng A4 dọc 13 cột + dòng ngày)</option>
               <option value="format2">Format 2 (Giấy đi chợ)</option>
               <option value="duyet_dinh_muc">Duyệt định mức (A4 ngang, gộp món liền kề)</option>
+              <option value="bizen_po">BIZEN PO Lưới (Đặt hàng 9 cột)</option>
             </select>
           </div>
         </div>
@@ -605,11 +620,18 @@ def run_batch():
 
     for file_path in files:
         file_bytes = file_path.read_bytes()
-        outputs = (
-            ("format1", f"{file_path.stem} - da dinh dang.xlsx", "Format 1"),
-            ("format2", f"{file_path.stem} - giay di cho.xlsx", "Format 2"),
-            (APPROVAL_FORMAT_MODE, f"{file_path.stem} - duyet dinh muc.xlsx", "Duyệt định mức"),
-        )
+
+        # Nếu file là BIZEN PO Lưới → chỉ chạy format BIZEN
+        if _detect_bizen_file(file_path.name):
+            outputs = (
+                (BIZEN_FORMAT_MODE, f"{file_path.stem} - bizen po.xlsx", "BIZEN PO"),
+            )
+        else:
+            outputs = (
+                ("format1", f"{file_path.stem} - da dinh dang.xlsx", "Format 1"),
+                ("format2", f"{file_path.stem} - giay di cho.xlsx", "Format 2"),
+                (APPROVAL_FORMAT_MODE, f"{file_path.stem} - duyet dinh muc.xlsx", "Duyệt định mức"),
+            )
         for format_mode, output_name, label in outputs:
             try:
                 output_bytes = format_workbook_bytes(
