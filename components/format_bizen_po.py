@@ -1,65 +1,90 @@
 """
-Format Bizen Catering – chuyển đổi file PO Lưới từ BIZEN - CATERING sang bảng
-dữ liệu gọn gàng với 9 cột:
+Format Bizen Catering – chuyển đổi file PO từ BIZEN - CATERING sang bảng
+dữ liệu gọn gàng với 12 cột:
 
-  Mã hàng | Tên nhà cung cấp | Diễn giải | Đơn vị | Số lượng | Đơn giá | Thành tiền | Khách hàng | Ca ăn
+  Mã PO | Ngày | Mã hàng | Tên nhà cung cấp | Diễn giải | Số lượng |
+  Đơn giá | Đơn vị | Thành tiền | Khách hàng | Ca | Nơi giao hàng
 
-File nguồn được nhận diện khi tên chứa chuỗi
-"BIZEN - CATERING_Đặt hàng (PO)_Lưới".
+Dữ liệu được nhóm theo Mã PO, cột Ngày chỉ hiển thị ở dòng đầu của
+mỗi nhóm Mã PO.
+
+Nhận diện file theo 2 cách:
+1. Tên file chứa "BIZEN - CATERING_Đặt hàng (PO)"
+2. Bất kỳ file nào có đủ các cột bắt buộc (Mã PO, Mã nguyên vật liệu,
+   Tên nguyên vật liệu, Đơn vị tính, Nhà cung cấp, Đơn giá, Thành tiền)
 """
 
 import re
 from copy import copy
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side, numbers
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from .common import merged_value_lookup, effective_cell_value
 
 
 # ---------------------------------------------------------------------------
-# Tên file nhận diện
+# Tên file nhận diện (chỉ cần chứa phần trước "_Lưới" / "_quan" / …)
 # ---------------------------------------------------------------------------
-BIZEN_IDENTIFIER = "BIZEN - CATERING_Đặt hàng (PO)_Lưới"
+BIZEN_IDENTIFIER = "BIZEN - CATERING_Đặt hàng (PO)"
 BIZEN_FORMAT_MODE = "bizen_po"
 
-# ---------------------------------------------------------------------------
-# Mapping cột nguồn (1-indexed) theo header row 1 của file Lưới
-# ---------------------------------------------------------------------------
-_SRC_MA_DAT_HANG = 1       # Mã đặt hàng
-_SRC_TEN_NVL = 7            # Tên nguyên vật liệu
-_SRC_KHOI_LUONG = 9         # Khối lượng đặt hàng  (= Số lượng)
-_SRC_DON_VI = 10            # Đơn vị tính
-_SRC_NHA_CUNG_CAP = 11      # Nhà cung cấp
-_SRC_DON_GIA = 12           # Đơn giá
-_SRC_THANH_TIEN = 15        # Thành tiền
-_SRC_NOI_GIAO = 16          # Nơi giao hàng (Khách hàng)
-
-# ---------------------------------------------------------------------------
-# Header đầu ra
-# ---------------------------------------------------------------------------
-OUTPUT_HEADERS = [
-    "Mã hàng",
-    "Tên nhà cung cấp",
-    "Diễn giải",
-    "Đơn vị",
-    "Số lượng",
+# Các header bắt buộc để nhận diện file theo nội dung
+_REQUIRED_HEADERS = {
+    "Mã PO",
+    "Mã nguyên vật liệu",
+    "Tên nguyên vật liệu",
+    "Đơn vị tính",
     "Đơn giá",
     "Thành tiền",
-    "Khách hàng",
-    "Ca ăn",
+}
+
+
+def can_process_bizen_po(ws):
+    """Kiểm tra worksheet có đủ các cột bắt buộc để xử lý format BIZEN PO."""
+    headers = set()
+    for c in range(1, min(ws.max_column + 1, 30)):
+        val = ws.cell(1, c).value
+        if val:
+            headers.add(str(val).strip())
+    return _REQUIRED_HEADERS.issubset(headers)
+
+# ---------------------------------------------------------------------------
+# Header đầu ra (12 cột) – đúng thứ tự yêu cầu
+# ---------------------------------------------------------------------------
+OUTPUT_HEADERS = [
+    "Mã PO",              # 1
+    "Ngày",                # 2
+    "Mã hàng",             # 3
+    "Tên nhà cung cấp",   # 4
+    "Diễn giải",           # 5
+    "Số lượng",            # 6
+    "Đơn giá",             # 7
+    "Đơn vị",              # 8
+    "Thành tiền",          # 9
+    "Khách hàng",          # 10
+    "Ca",                  # 11
+    "Nơi giao hàng",      # 12
 ]
 
 # Column indices trong output (1-indexed)
-_OUT_MA_HANG = 1
-_OUT_NCC = 2
-_OUT_DIEN_GIAI = 3
-_OUT_DON_VI = 4
-_OUT_SO_LUONG = 5
-_OUT_DON_GIA = 6
-_OUT_THANH_TIEN = 7
-_OUT_KHACH_HANG = 8
-_OUT_CA_AN = 9
+_OUT_MA_PO = 1
+_OUT_NGAY = 2
+_OUT_MA_HANG = 3
+_OUT_NCC = 4
+_OUT_DIEN_GIAI = 5
+_OUT_SO_LUONG = 6
+_OUT_DON_GIA = 7
+_OUT_DON_VI = 8
+_OUT_THANH_TIEN = 9
+_OUT_KHACH_HANG = 10
+_OUT_CA = 11
+_OUT_NOI_GIAO = 12
+
+# Các cột căn giữa
+_CENTER_COLS = {_OUT_MA_PO, _OUT_NGAY, _OUT_MA_HANG, _OUT_DON_VI, _OUT_KHACH_HANG, _OUT_CA}
+# Các cột căn phải (số)
+_RIGHT_COLS = {_OUT_SO_LUONG, _OUT_DON_GIA, _OUT_THANH_TIEN}
 
 
 # ---------------------------------------------------------------------------
@@ -88,42 +113,28 @@ def _parse_currency(value):
     # Loại bỏ các ký hiệu tiền tệ
     text = text.replace("₫", "").replace("đ", "").replace("VND", "").replace("vnd", "").strip()
 
-    # Xử lý dấu phân cách:
-    # Trường hợp '1,100' hoặc '65,000' (dấu phẩy là separator hàng nghìn)
-    # Trường hợp '65.000' (dấu chấm là separator hàng nghìn kiểu VN)
-    #
-    # Heuristic: nếu có dấu phẩy, coi dấu phẩy là separator nghìn
-    #            nếu chỉ có dấu chấm, kiểm tra xem có phải separator nghìn hay thập phân
+    # Xử lý dấu phân cách
     if "," in text and "." in text:
-        # Both separators: e.g. '1,234.56' or '1.234,56'
-        # Detect which is thousands separator
         last_comma = text.rfind(",")
         last_dot = text.rfind(".")
         if last_comma > last_dot:
-            # European style: 1.234,56 → remove dots, comma→dot
             text = text.replace(".", "").replace(",", ".")
         else:
-            # US style: 1,234.56 → remove commas
             text = text.replace(",", "")
     elif "," in text:
-        # Only commas: '1,100' → thousands separator
         text = text.replace(",", "")
     elif "." in text:
-        # Only dots: check if thousands separator
-        # If there's exactly one dot and 3 digits after → thousands (VN style)
         parts = text.split(".")
         if len(parts) == 2 and len(parts[1]) == 3:
             text = text.replace(".", "")
         elif len(parts) > 2:
-            # Multiple dots like '1.234.567' → thousands
             text = text.replace(".", "")
-        # else: single dot with != 3 decimals → treat as decimal
 
     try:
         num = float(text)
         return int(num) if num == int(num) else num
     except (ValueError, OverflowError):
-        return value  # trả về nguyên nếu không parse được
+        return value
 
 
 def _parse_number(value):
@@ -135,7 +146,6 @@ def _parse_number(value):
     text = str(value).strip()
     if not text:
         return None
-    # Thay dấu phẩy thành chấm cho an toàn
     text = text.replace(",", ".")
     try:
         num = float(text)
@@ -157,18 +167,23 @@ def _detect_source_columns(ws):
             header_map[str(val).strip()] = c
 
     mapping = {
-        "ma_dat_hang": header_map.get("Mã đặt hàng"),
-        "ten_nvl": header_map.get("Tên nguyên vật liệu"),
-        "khoi_luong": header_map.get("Khối lượng đặt hàng"),
-        "don_vi": header_map.get("Đơn vị tính"),
-        "nha_cung_cap": header_map.get("Nhà cung cấp"),
-        "don_gia": header_map.get("Đơn giá"),
-        "thanh_tien": header_map.get("Thành tiền"),
-        "noi_giao": header_map.get("Nơi giao hàng (Khách hàng)"),
-        "ca_an": header_map.get("Ca ăn"),  # có thể None
+        "ma_po": header_map.get("Mã PO"),                       # → Mã PO
+        "ngay": header_map.get("Ngày"),                          # → Ngày
+        "ma_nvl": header_map.get("Mã nguyên vật liệu"),         # → Mã hàng
+        "ten_nvl": header_map.get("Tên nguyên vật liệu"),       # → Diễn giải
+        "so_luong": header_map.get("Khối lượng đặt hàng")       # → Số lượng
+                    or header_map.get("Số lượng"),
+        "don_vi": header_map.get("Đơn vị tính"),                 # → Đơn vị
+        "nha_cung_cap": header_map.get("Nhà cung cấp"),         # → Tên nhà cung cấp
+        "don_gia": header_map.get("Đơn giá"),                    # → Đơn giá
+        "thanh_tien": header_map.get("Thành tiền"),              # → Thành tiền
+        "khach_hang": header_map.get("Khách hàng"),              # → Khách hàng
+        "ca": header_map.get("Ca")                               # → Ca
+              or header_map.get("Ca ăn"),
+        "noi_giao": header_map.get("Nơi giao hàng (Khách hàng)"),  # → Nơi giao hàng
     }
 
-    required = ["ma_dat_hang", "ten_nvl", "don_vi", "nha_cung_cap", "don_gia", "thanh_tien"]
+    required = ["ma_po", "ma_nvl", "ten_nvl", "don_vi", "nha_cung_cap", "don_gia", "thanh_tien"]
     missing = [k for k in required if mapping[k] is None]
     if missing:
         raise ValueError(
@@ -191,27 +206,40 @@ def process_sheet_bizen_po(ws):
     # Thu thập dữ liệu
     rows_data = []
     for r in range(2, ws.max_row + 1):
-        ma_hang = effective_cell_value(ws, lookup, r, col_map["ma_dat_hang"])
+        ma_po = effective_cell_value(ws, lookup, r, col_map["ma_po"])
+        ma_hang = effective_cell_value(ws, lookup, r, col_map["ma_nvl"])
         ten_nvl = effective_cell_value(ws, lookup, r, col_map["ten_nvl"])
         don_vi = effective_cell_value(ws, lookup, r, col_map["don_vi"])
         nha_cung_cap = effective_cell_value(ws, lookup, r, col_map["nha_cung_cap"])
         don_gia_raw = effective_cell_value(ws, lookup, r, col_map["don_gia"])
         thanh_tien_raw = effective_cell_value(ws, lookup, r, col_map["thanh_tien"])
-        noi_giao = effective_cell_value(ws, lookup, r, col_map["noi_giao"])
+        so_luong_raw = effective_cell_value(ws, lookup, r, col_map["so_luong"])
 
-        khoi_luong_raw = effective_cell_value(ws, lookup, r, col_map["khoi_luong"])
-        ca_an_col = col_map.get("ca_an")
-        ca_an = effective_cell_value(ws, lookup, r, ca_an_col) if ca_an_col else None
+        # Cột Ngày
+        ngay_col = col_map.get("ngay")
+        ngay = effective_cell_value(ws, lookup, r, ngay_col) if ngay_col else None
+
+        # Các cột optional
+        khach_hang_col = col_map.get("khach_hang")
+        khach_hang = effective_cell_value(ws, lookup, r, khach_hang_col) if khach_hang_col else None
+
+        ca_col = col_map.get("ca")
+        ca = effective_cell_value(ws, lookup, r, ca_col) if ca_col else None
+
+        noi_giao_col = col_map.get("noi_giao")
+        noi_giao = effective_cell_value(ws, lookup, r, noi_giao_col) if noi_giao_col else None
 
         # Bỏ qua dòng hoàn toàn trống
-        if ma_hang is None and ten_nvl is None and don_gia_raw is None:
+        if ma_po is None and ma_hang is None and ten_nvl is None and don_gia_raw is None:
             continue
 
-        so_luong = _parse_number(khoi_luong_raw)
+        so_luong = _parse_number(so_luong_raw)
         don_gia = _parse_currency(don_gia_raw)
         thanh_tien = _parse_currency(thanh_tien_raw)
 
         rows_data.append({
+            "ma_po": ma_po,
+            "ngay": ngay,
             "ma_hang": ma_hang,
             "nha_cung_cap": nha_cung_cap,
             "dien_giai": ten_nvl,
@@ -219,12 +247,30 @@ def process_sheet_bizen_po(ws):
             "so_luong": so_luong,
             "don_gia": don_gia,
             "thanh_tien": thanh_tien,
-            "khach_hang": noi_giao,
-            "ca_an": ca_an,
+            "khach_hang": khach_hang,
+            "ca": ca,
+            "noi_giao": noi_giao,
         })
 
     if not rows_data:
         raise ValueError("Không tìm thấy dữ liệu trong file nguồn.")
+
+    # -----------------------------------------------------------------------
+    # Sắp xếp dữ liệu theo Mã PO để nhóm lại
+    # -----------------------------------------------------------------------
+    rows_data.sort(key=lambda row: str(row["ma_po"] or ""))
+
+    # -----------------------------------------------------------------------
+    # Xử lý cột Ngày: chỉ hiển thị ở dòng đầu tiên của mỗi nhóm Mã PO
+    # -----------------------------------------------------------------------
+    prev_po = None
+    for row in rows_data:
+        current_po = row["ma_po"]
+        if current_po == prev_po:
+            row["ngay_display"] = None  # để trống cho các dòng sau
+        else:
+            row["ngay_display"] = row["ngay"]
+        prev_po = current_po
 
     # -----------------------------------------------------------------------
     # Tạo workbook đầu ra
@@ -265,15 +311,18 @@ def process_sheet_bizen_po(ws):
     # ---- Data rows -------------------------------------------------------
     for row_idx, data in enumerate(rows_data, start=2):
         values = [
+            data["ma_po"],
+            data["ngay_display"],
             data["ma_hang"],
             data["nha_cung_cap"],
             data["dien_giai"],
-            data["don_vi"],
             data["so_luong"],
             data["don_gia"],
+            data["don_vi"],
             data["thanh_tien"],
             data["khach_hang"],
-            data["ca_an"],
+            data["ca"],
+            data["noi_giao"],
         ]
         for col_idx, val in enumerate(values, start=1):
             cell = out_ws.cell(row=row_idx, column=col_idx, value=val)
@@ -281,9 +330,9 @@ def process_sheet_bizen_po(ws):
             cell.border = body_border
 
             # Alignment theo yêu cầu
-            if col_idx in (_OUT_MA_HANG, _OUT_DON_VI, _OUT_KHACH_HANG, _OUT_CA_AN):
+            if col_idx in _CENTER_COLS:
                 cell.alignment = align_center
-            elif col_idx in (_OUT_SO_LUONG, _OUT_DON_GIA, _OUT_THANH_TIEN):
+            elif col_idx in _RIGHT_COLS:
                 cell.alignment = align_right
                 # Number format
                 if isinstance(val, (int, float)):
@@ -294,28 +343,56 @@ def process_sheet_bizen_po(ws):
             else:
                 cell.alignment = align_left
 
+    # ---- Merge cells cho cột Mã PO và Ngày theo nhóm Mã PO ---------------
+    last_row = len(rows_data) + 1
+    if last_row > 2:
+        group_start = 2  # first data row
+        for row_idx in range(3, last_row + 2):  # +2 to handle last group
+            current_po = out_ws.cell(row=row_idx, column=_OUT_MA_PO).value if row_idx <= last_row else None
+            prev_po_val = out_ws.cell(row=row_idx - 1, column=_OUT_MA_PO).value
+            if current_po != prev_po_val or row_idx > last_row:
+                group_end = row_idx - 1
+                if group_end > group_start:
+                    # Merge cột Mã PO
+                    out_ws.merge_cells(
+                        start_row=group_start,
+                        start_column=_OUT_MA_PO,
+                        end_row=group_end,
+                        end_column=_OUT_MA_PO,
+                    )
+                    out_ws.cell(row=group_start, column=_OUT_MA_PO).alignment = Alignment(
+                        horizontal="center", vertical="center", wrap_text=True
+                    )
+                    # Merge cột Ngày
+                    out_ws.merge_cells(
+                        start_row=group_start,
+                        start_column=_OUT_NGAY,
+                        end_row=group_end,
+                        end_column=_OUT_NGAY,
+                    )
+                    out_ws.cell(row=group_start, column=_OUT_NGAY).alignment = Alignment(
+                        horizontal="center", vertical="center", wrap_text=True
+                    )
+                group_start = row_idx
+
     # ---- Auto-fit column widths ------------------------------------------
     for col_idx in range(1, len(OUTPUT_HEADERS) + 1):
         max_len = len(OUTPUT_HEADERS[col_idx - 1])
-        for row_idx in range(2, len(rows_data) + 2):
+        for row_idx in range(2, last_row + 1):
             cell_val = out_ws.cell(row=row_idx, column=col_idx).value
             if cell_val is not None:
-                # Cho số có format → ước lượng chiều rộng
                 if isinstance(cell_val, (int, float)):
                     display_len = len("{:,.0f}".format(cell_val))
                 else:
                     display_len = len(str(cell_val))
                 if display_len > max_len:
                     max_len = display_len
-        # Thêm padding
         adjusted_width = max_len + 4
-        # Giới hạn tối thiểu và tối đa
         adjusted_width = max(10, min(adjusted_width, 45))
         out_ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
 
     # ---- Auto filter trên header row ------------------------------------
     last_col_letter = get_column_letter(len(OUTPUT_HEADERS))
-    last_row = len(rows_data) + 1
     out_ws.auto_filter.ref = "A1:{}{}".format(last_col_letter, last_row)
 
     # ---- Freeze header row -----------------------------------------------
@@ -326,6 +403,9 @@ def process_sheet_bizen_po(ws):
     for row_idx in range(2, last_row + 1):
         if row_idx % 2 == 0:
             for col_idx in range(1, len(OUTPUT_HEADERS) + 1):
-                out_ws.cell(row=row_idx, column=col_idx).fill = even_fill
+                cell = out_ws.cell(row=row_idx, column=col_idx)
+                # Không ghi đè fill cho merged cells (chỉ top-left cell có value)
+                if cell.value is not None or col_idx != _OUT_NGAY:
+                    cell.fill = even_fill
 
     return out_wb

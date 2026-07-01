@@ -28,7 +28,7 @@ from components.common import (
     output_dir,
     APPROVAL_FORMAT_MODE,
 )
-from components.format_bizen_po import BIZEN_IDENTIFIER, BIZEN_FORMAT_MODE
+from components.format_bizen_po import BIZEN_IDENTIFIER, BIZEN_FORMAT_MODE, can_process_bizen_po
 from components import (
     process_sheet_format1_a4,
     process_sheet_format2,
@@ -38,7 +38,7 @@ from components import (
 
 
 def _detect_bizen_file(filename):
-    """Trả về True nếu tên file chứa chuỗi nhận diện BIZEN PO Lưới."""
+    """Trả về True nếu tên file chứa chuỗi nhận diện BIZEN PO."""
     return BIZEN_IDENTIFIER in (filename or "")
 
 
@@ -51,10 +51,9 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
     if suffix not in {".xlsx", ".xlsm", ".csv"}:
         raise ValueError("Vui lòng chọn file Excel .xlsx, .xlsm hoặc .csv.")
 
-    # Auto-detect BIZEN PO Lưới files by filename
-    if format_mode == "auto" or _detect_bizen_file(safe_name):
-        if _detect_bizen_file(safe_name):
-            format_mode = BIZEN_FORMAT_MODE
+    # Auto-detect BIZEN PO files by filename
+    if _detect_bizen_file(safe_name):
+        format_mode = BIZEN_FORMAT_MODE
 
     if suffix == ".csv":
         from io import StringIO
@@ -67,6 +66,10 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
     else:
         workbook = load_workbook(BytesIO(file_bytes))
         worksheet = ensure_visible_worksheet(workbook, workbook.active)
+
+    # Auto-detect by headers: nếu chưa chọn BIZEN mà file có đủ cột → tự chuyển
+    if format_mode != BIZEN_FORMAT_MODE and can_process_bizen_po(worksheet):
+        format_mode = BIZEN_FORMAT_MODE
 
     if format_mode == BIZEN_FORMAT_MODE:
         workbook = process_sheet_bizen_po(worksheet)
