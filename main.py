@@ -4,6 +4,8 @@ from pathlib import Path
 from urllib.parse import unquote
 import argparse
 import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding='utf-8')
 import webbrowser
 import html
 import csv
@@ -29,17 +31,24 @@ from components.common import (
     APPROVAL_FORMAT_MODE,
 )
 from components.format_bizen_po import BIZEN_IDENTIFIER, BIZEN_FORMAT_MODE, can_process_bizen_po
+from components.format_bizen_po_export import BIZEN_EXPORT_IDENTIFIER, BIZEN_EXPORT_FORMAT_MODE, can_process_bizen_po_export
 from components import (
     process_sheet_format1_a4,
     process_sheet_format2,
     process_sheet_approval,
     process_sheet_bizen_po,
+    process_sheet_bizen_po_export,
 )
 
 
 def _detect_bizen_file(filename):
     """Trả về True nếu tên file chứa chuỗi nhận diện BIZEN PO."""
     return BIZEN_IDENTIFIER in (filename or "")
+
+
+def _detect_bizen_export_file(filename):
+    """Trả về True nếu tên file chứa chuỗi nhận diện BIZEN PO Xuất."""
+    return BIZEN_EXPORT_IDENTIFIER in (filename or "")
 
 
 def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="format1", selected_kitchen=None):
@@ -52,7 +61,9 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
         raise ValueError("Vui lòng chọn file Excel .xlsx, .xlsm hoặc .csv.")
 
     # Auto-detect BIZEN PO files by filename
-    if _detect_bizen_file(safe_name):
+    if _detect_bizen_export_file(safe_name):
+        format_mode = BIZEN_EXPORT_FORMAT_MODE
+    elif _detect_bizen_file(safe_name):
         format_mode = BIZEN_FORMAT_MODE
 
     if suffix == ".csv":
@@ -68,10 +79,15 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
         worksheet = ensure_visible_worksheet(workbook, workbook.active)
 
     # Auto-detect by headers: nếu chưa chọn BIZEN mà file có đủ cột → tự chuyển
-    if format_mode != BIZEN_FORMAT_MODE and can_process_bizen_po(worksheet):
-        format_mode = BIZEN_FORMAT_MODE
+    if format_mode not in (BIZEN_FORMAT_MODE, BIZEN_EXPORT_FORMAT_MODE):
+        if can_process_bizen_po_export(worksheet):
+            format_mode = BIZEN_EXPORT_FORMAT_MODE
+        elif can_process_bizen_po(worksheet):
+            format_mode = BIZEN_FORMAT_MODE
 
-    if format_mode == BIZEN_FORMAT_MODE:
+    if format_mode == BIZEN_EXPORT_FORMAT_MODE:
+        workbook = process_sheet_bizen_po_export(worksheet)
+    elif format_mode == BIZEN_FORMAT_MODE:
         workbook = process_sheet_bizen_po(worksheet)
     elif format_mode == "format2":
         workbook = process_sheet_format2(worksheet, Path(safe_name), date_mode, selected_kitchen)
@@ -405,6 +421,7 @@ index_html = """<!doctype html>
               <option value="format2">Format 2 (Giấy đi chợ)</option>
               <option value="duyet_dinh_muc">Duyệt định mức (A4 ngang, gộp món liền kề)</option>
               <option value="bizen_po">BIZEN PO Lưới (Đặt hàng 9 cột)</option>
+              <option value="bizen_po_export">BIZEN PO Xuất (Có mẫu)</option>
             </select>
           </div>
         </div>
@@ -555,6 +572,28 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
             kitchen_opt = fields.get("kitchen", "bep_tai_cho")
             format_opt = fields.get("format_mode", "format1")
 
+            # ---------------- DIAGNOSTIC LOGGING ----------------
+            try:
+                import datetime
+                from openpyxl import load_workbook
+                import io
+                wb_test = load_workbook(filename=io.BytesIO(file_bytes), data_only=True)
+                ws_test = wb_test.active
+                headers_test = []
+                for c in range(1, min(ws_test.max_column + 1, 20)):
+                    val = ws_test.cell(1, c).value
+                    if val is not None:
+                        headers_test.append(str(val).strip())
+                with open("diagnostic_log.txt", "a", encoding="utf-8") as f:
+                    f.write(f"\n--- {datetime.datetime.now()} ---\n")
+                    f.write(f"Uploaded file: {filename}\n")
+                    f.write(f"Format mode selected: {format_opt}\n")
+                    f.write(f"Headers row 1: {headers_test}\n")
+            except Exception as e:
+                with open("diagnostic_log.txt", "a", encoding="utf-8") as f:
+                    f.write(f"Error logging headers: {e}\n")
+            # ----------------------------------------------------
+
             if kitchen_opt == "bep_trung_tam":
                 selected_kitchen = "Bếp trung tâm"
             elif kitchen_opt == "bep_trung_tam_2":
@@ -625,7 +664,11 @@ def run_batch():
         file_bytes = file_path.read_bytes()
 
         # Nếu file là BIZEN PO Lưới → chỉ chạy format BIZEN
-        if _detect_bizen_file(file_path.name):
+        if _detect_bizen_export_file(file_path.name):
+            outputs = (
+                (BIZEN_EXPORT_FORMAT_MODE, f"{file_path.stem} - xuat po.xlsx", "BIZEN PO Xuất"),
+            )
+        elif _detect_bizen_file(file_path.name):
             outputs = (
                 (BIZEN_FORMAT_MODE, f"{file_path.stem} - bizen po.xlsx", "BIZEN PO"),
             )

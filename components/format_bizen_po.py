@@ -35,10 +35,7 @@ _REQUIRED_HEADERS = {
     "Mã nguyên vật liệu",
     "Tên nguyên vật liệu",
     "Đơn vị tính",
-    "Đơn giá",
-    "Thành tiền",
 }
-
 
 def can_process_bizen_po(ws):
     """Kiểm tra worksheet có đủ các cột bắt buộc để xử lý format BIZEN PO."""
@@ -47,7 +44,11 @@ def can_process_bizen_po(ws):
         val = ws.cell(1, c).value
         if val:
             headers.add(str(val).strip())
-    return _REQUIRED_HEADERS.issubset(headers)
+    
+    has_base = _REQUIRED_HEADERS.issubset(headers)
+    has_don_gia = "Đơn giá" in headers or "Sum: Đơn giá" in headers or "Tổng Đơn giá" in headers
+    has_thanh_tien = "Thành tiền" in headers or "Sum: Thành tiền" in headers or "Tổng thành tiền" in headers
+    return has_base and has_don_gia and has_thanh_tien
 
 # ---------------------------------------------------------------------------
 # Header đầu ra (12 cột) – đúng thứ tự yêu cầu
@@ -171,12 +172,18 @@ def _detect_source_columns(ws):
         "ngay": header_map.get("Ngày"),                          # → Ngày
         "ma_nvl": header_map.get("Mã nguyên vật liệu"),         # → Mã hàng
         "ten_nvl": header_map.get("Tên nguyên vật liệu"),       # → Diễn giải
-        "so_luong": header_map.get("Khối lượng đặt hàng")       # → Số lượng
-                    or header_map.get("Số lượng"),
+        "so_luong": header_map.get("Khối lượng đặt hàng")
+                    or header_map.get("Số lượng")
+                    or header_map.get("Sum: Khối lượng đặt hàng")
+                    or header_map.get("Tổng Khối lượng đặt hàng"),
         "don_vi": header_map.get("Đơn vị tính"),                 # → Đơn vị
         "nha_cung_cap": header_map.get("Nhà cung cấp"),         # → Tên nhà cung cấp
-        "don_gia": header_map.get("Đơn giá"),                    # → Đơn giá
-        "thanh_tien": header_map.get("Thành tiền"),              # → Thành tiền
+        "don_gia": header_map.get("Đơn giá")
+                   or header_map.get("Sum: Đơn giá")
+                   or header_map.get("Tổng Đơn giá"),            # → Đơn giá
+        "thanh_tien": header_map.get("Thành tiền")
+                      or header_map.get("Sum: Thành tiền")
+                      or header_map.get("Tổng thành tiền"),      # → Thành tiền
         "khach_hang": header_map.get("Khách hàng"),              # → Khách hàng
         "ca": header_map.get("Ca")                               # → Ca
               or header_map.get("Ca ăn"),
@@ -186,9 +193,11 @@ def _detect_source_columns(ws):
     required = ["ma_po", "ma_nvl", "ten_nvl", "don_vi", "nha_cung_cap", "don_gia", "thanh_tien"]
     missing = [k for k in required if mapping[k] is None]
     if missing:
+        found = list(header_map.keys())
         raise ValueError(
             "Không tìm thấy các cột bắt buộc trong file nguồn: "
             + ", ".join(missing)
+            + f". Các cột đã đọc được ở dòng 1 là: {found}"
         )
     return mapping
 
