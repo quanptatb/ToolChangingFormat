@@ -86,7 +86,6 @@ def build_compact_shopping_workbook(
     weekday_text,
     target_sheet_name,
 ):
-    """Create a compact, two-panel A4 shopping sheet from BOM rows."""
     lixil_key = normalize_comp("LIXIL")
     company_names = {}
     groups = {}
@@ -241,199 +240,218 @@ def build_compact_shopping_workbook(
         )
     )
 
-    left_blocks = []
-    right_blocks = []
-    left_count = 0
-    right_count = 0
+    sheet_blocks = {
+        "Bếp tại chỗ": [],
+        "Bếp trung tâm": [],
+        "Bếp trung tâm 2": []
+    }
+    
     for block in blocks:
-        if not left_blocks or left_count <= right_count:
-            left_blocks.append(block)
-            left_count += len(block["rows"])
+        ckey = block["company_key"].casefold()
+        if any(x in ckey for x in ["zamil", "wacoal", "quadrille", "smc", "lixil", "odsv", "osv"]):
+            sheet_blocks["Bếp tại chỗ"].append(block)
+        elif any(x in ckey for x in ["scavi", "sofa", "dona", "artwell"]):
+            sheet_blocks["Bếp trung tâm 2"].append(block)
         else:
-            right_blocks.append(block)
-            right_count += len(block["rows"])
-
-    left_row_count = sum(len(block["rows"]) for block in left_blocks)
-    right_row_count = sum(len(block["rows"]) for block in right_blocks)
-    max_panel_rows = max(left_row_count, right_row_count)
-    page_break_rows = set()
-    if max_panel_rows > 14:
-        page_break_rows.add(3 + max_panel_rows // 2)
+            sheet_blocks["Bếp trung tâm"].append(block)
 
     workbook = Workbook()
-    worksheet = workbook.active
-    sheet_title = "Bếp trung tâm" if target_sheet_name == "Bếp trung tâm 1" else target_sheet_name
-    worksheet.title = sheet_title[:31]
+    first_sheet = True
+    
+    blue_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+    pink_fill = PatternFill(start_color="FCE4D6", end_color="FCE4D6", fill_type="solid")
+    white_bold = Font(name="Calibri", size=14, color="FFFFFF", bold=True)
+    black_bold = Font(name="Calibri", size=14, color="000000", bold=True)
+    red_bold = Font(name="Calibri", size=14, color="FF0000", bold=True)
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+    align_rotate = Alignment(horizontal="center", vertical="center", text_rotation=90, wrap_text=True)
 
-    sheet_title_key = sheet_title.casefold()
-    if "tại chỗ" in sheet_title_key:
-        kitchen_label = "BẾP TẠI CHỖ"
-    elif "trung tâm 2" in sheet_title_key:
-        kitchen_label = "BẾP TRUNG TÂM 2"
-    else:
-        kitchen_label = "BẾP TRUNG TÂM"
-    weekday_label = weekday_text.strip().rstrip("-").strip()
-    title = f"GIẤY ĐI CHỢ - {kitchen_label}"
-    if weekday_label or date_text:
-        title += f" | {weekday_label} {date_text}".rstrip()
+    for sheet_name, s_blocks in sheet_blocks.items():
+        if not s_blocks:
+            continue
+            
+        if first_sheet:
+            worksheet = workbook.active
+            worksheet.title = sheet_name
+            first_sheet = False
+        else:
+            worksheet = workbook.create_sheet(title=sheet_name)
+            
+        left_blocks = []
+        right_blocks = []
+        left_count = 0
+        right_count = 0
+        for block in s_blocks:
+            if not left_blocks or left_count <= right_count:
+                left_blocks.append(block)
+                left_count += len(block["rows"])
+            else:
+                right_blocks.append(block)
+                right_count += len(block["rows"])
+                
+        worksheet.merge_cells("A1:D1")
+        worksheet["A1"] = (weekday_text.strip().rstrip("-").strip() + " -") if weekday_text else "Thứ - "
+        worksheet["A1"].fill = blue_fill
+        worksheet["A1"].font = white_bold
+        worksheet["A1"].alignment = align_center
 
-    worksheet.merge_cells("A1:J1")
-    title_cell = worksheet["A1"]
-    title_cell.value = title
-    title_cell.font = Font(name="Calibri", size=18, bold=True, color="FFFFFF")
-    title_cell.fill = PatternFill("solid", fgColor="404040")
-    title_cell.alignment = Alignment(horizontal="center", vertical="center")
-    worksheet.row_dimensions[1].height = 32
+        worksheet.merge_cells("E1:G1")
+        worksheet["E1"] = date_text
+        worksheet["E1"].fill = blue_fill
+        worksheet["E1"].font = white_bold
+        worksheet["E1"].alignment = align_center
 
-    headers = ["Công ty", "SL theo Site", "Ca", "Món ăn", "Khối lượng đi chợ"]
-    header_fill = PatternFill("solid", fgColor="BFBFBF")
-    thin = Side(style="thin", color="D9D9D9")
-    group_side = Side(style="medium", color="A6A6A6")
-    body_border = Border(left=thin, right=thin, top=thin, bottom=thin)
-    for start_col in (1, 6):
-        for offset, value in enumerate(headers):
-            cell = worksheet.cell(2, start_col + offset)
-            cell.value = value
-            cell.font = Font(name="Calibri", size=14, bold=True, color="000000")
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-            cell.border = Border(left=thin, right=thin, top=group_side, bottom=group_side)
-    worksheet.row_dimensions[2].height = 34
+        worksheet.merge_cells("H1:I1")
+        worksheet["H1"] = sheet_name.upper()
+        worksheet["H1"].fill = yellow_fill
+        worksheet["H1"].font = black_bold
+        worksheet["H1"].alignment = align_center
 
-    company_fill = PatternFill("solid", fgColor="E7E6E6")
+        total_qty = 0
+        for b in s_blocks:
+            for r in b["rows"]:
+                try:
+                    q = r["qty"]
+                    if isinstance(q, str) and "+" in q:
+                        total_qty += sum(float(x.strip()) for x in q.split("+") if x.strip())
+                    elif isinstance(q, str) and "=" in q:
+                        after_eq = q.split("=")[-1]
+                        total_qty += float(after_eq.strip())
+                    elif str(q).replace('.','',1).isdigit():
+                        total_qty += float(str(q))
+                except:
+                    pass
+        worksheet["J1"] = str(total_qty)
+        worksheet["J1"].fill = yellow_fill
+        worksheet["J1"].font = red_bold
+        worksheet["J1"].alignment = align_center
+        worksheet.row_dimensions[1].height = 32
+        
+        headers = ["Cty", "", "Ca", "Món ăn", ""]
+        for start_col in (1, 6):
+            for offset, value in enumerate(headers):
+                cell = worksheet.cell(2, start_col + offset)
+                cell.value = value
+                cell.font = white_bold
+                cell.fill = blue_fill
+                cell.alignment = align_center
+                cell.border = thin_border
+        worksheet.row_dimensions[2].height = 34
 
-    def merge_segments(start_row, end_row):
-        cuts = sorted(row for row in page_break_rows if start_row < row <= end_row)
-        starts = [start_row] + cuts
-        ends = [row - 1 for row in cuts] + [end_row]
-        return list(zip(starts, ends))
+        page_break_rows = set()
+        max_panel_rows = max(left_count, right_count)
+        if max_panel_rows > 14:
+            page_break_rows.add(3 + max_panel_rows // 2)
 
-    def write_panel(panel_blocks, start_col):
-        def estimate_lines(value, chars_per_line):
-            text = str(value or "")
-            return sum(
-                max(1, (len(line) + chars_per_line - 1) // chars_per_line)
-                for line in text.splitlines() or [""]
-            )
+        def write_panel(panel_blocks, start_col):
+            current_row = 3
+            for block in panel_blocks:
+                block_start = current_row
+                for item in block["rows"]:
+                    values = [block["label"], item["qty"], item["shift"], item["dish"], item["recipe"]]
+                    for offset, value in enumerate(values):
+                        cell = worksheet.cell(current_row, start_col + offset)
+                        cell.value = value
+                        cell.font = Font(name="Calibri", size=14 if offset == 0 else 13, bold=offset in (0, 2))
+                        cell.border = thin_border
+                        if offset in (3, 4):
+                            cell.alignment = align_left
+                        else:
+                            cell.alignment = align_center
+                        
+                        if offset == 4:
+                            cell.fill = pink_fill
+                            
+                    current_row += 1
 
-        current_row = 3
-        for block in panel_blocks:
-            block_start = current_row
-            for item in block["rows"]:
-                values = [block["label"], item["qty"], item["shift"], item["dish"], item["recipe"]]
-                for offset, value in enumerate(values):
-                    cell = worksheet.cell(current_row, start_col + offset)
-                    cell.value = value
-                    cell.font = Font(
-                        name="Calibri",
-                        size=14 if offset == 0 else 13,
-                        bold=offset in (0, 2),
-                    )
-                    cell.border = body_border
-                    cell.alignment = Alignment(
-                        horizontal="center" if offset in (0, 1, 2) else "left",
-                        vertical="center",
-                        wrap_text=offset != 1,
-                    )
-                worksheet.cell(current_row, start_col + 1).number_format = "General"
-                estimated_lines = max(
-                    1,
-                    estimate_lines(item["dish"], 18),
-                    estimate_lines(item["recipe"], 26),
-                )
-                worksheet.row_dimensions[current_row].height = max(
-                    worksheet.row_dimensions[current_row].height or 0,
-                    min(190, max(26, 19 * estimated_lines + 4)),
-                )
-                current_row += 1
+                is_tai_cho = ("tại chỗ" in sheet_name.casefold())
+                block_end = current_row - 1
+                for row_num in range(block_start, block_end + 1):
+                    company_cell = worksheet.cell(row_num, start_col)
+                    if is_tai_cho:
+                        company_cell.alignment = align_rotate
+                    else:
+                        company_cell.alignment = align_center
 
-            block_end = current_row - 1
-            for row_num in range(block_start, block_end + 1):
-                company_cell = worksheet.cell(row_num, start_col)
-                company_cell.fill = company_fill
-                company_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                shift_col = start_col + 2
+                shift_start = block_start
+                previous_shift = worksheet.cell(block_start, shift_col).value
+                for row_num in range(block_start + 1, block_end + 2):
+                    shift_value = worksheet.cell(row_num, shift_col).value if row_num <= block_end else None
+                    if row_num in page_break_rows or shift_value != previous_shift:
+                        if row_num - 1 > shift_start:
+                            worksheet.merge_cells(start_row=shift_start, start_column=shift_col, end_row=row_num - 1, end_column=shift_col)
+                        shift_start = row_num
+                        previous_shift = shift_value
+            return current_row - 1
 
-            shift_col = start_col + 2
-            shift_start = block_start
-            previous_shift = worksheet.cell(block_start, shift_col).value
-            for row_num in range(block_start + 1, block_end + 2):
-                shift_value = worksheet.cell(row_num, shift_col).value if row_num <= block_end else None
-                if row_num in page_break_rows or shift_value != previous_shift:
-                    if row_num - 1 > shift_start:
-                        worksheet.merge_cells(
-                            start_row=shift_start,
-                            start_column=shift_col,
-                            end_row=row_num - 1,
-                            end_column=shift_col,
-                        )
-                    shift_start = row_num
-                    previous_shift = shift_value
-        return current_row - 1
+        left_end = write_panel(left_blocks, 1)
+        right_end = write_panel(right_blocks, 6)
+        last_row = max(left_end, right_end, 3)
+        
+        def merge_adjacent_same_company(start_col, start_row, end_row):
+            if end_row < start_row:
+                return
+            segment_start = start_row
+            previous_value = worksheet.cell(start_row, start_col).value
+            for row_num in range(start_row + 1, end_row + 2):
+                current_value = worksheet.cell(row_num, start_col).value if row_num <= end_row else None
+                should_close = row_num in page_break_rows or current_value != previous_value
+                if should_close:
+                    if previous_value and row_num - 1 > segment_start:
+                        worksheet.merge_cells(start_row=segment_start, start_column=start_col, end_row=row_num - 1, end_column=start_col)
+                    company_cell = worksheet.cell(segment_start, start_col)
+                    company_cell.value = previous_value
+                    if "tại chỗ" in sheet_name.casefold():
+                        company_cell.alignment = align_rotate
+                    else:
+                        company_cell.alignment = align_center
+                    segment_start = row_num
+                    previous_value = current_value
 
-    left_end = write_panel(left_blocks, 1)
-    right_end = write_panel(right_blocks, 6)
-    last_row = max(left_end, right_end, 3)
+        merge_adjacent_same_company(1, 3, left_end)
+        merge_adjacent_same_company(6, 3, right_end)
 
-    def merge_adjacent_same_company(start_col, start_row, end_row):
-        if end_row < start_row:
-            return
+        for row in range(3, last_row + 1):
+            for col in range(1, 11):
+                cell = worksheet.cell(row, col)
+                if getattr(cell, 'value', None) is None and type(cell).__name__ != 'MergedCell':
+                    cell.border = thin_border
+                    if col in (5, 10):
+                        cell.fill = pink_fill
+                        
+        widths = {"A": 8, "B": 12, "C": 10, "D": 40, "E": 20, "F": 10, "G": 12, "H": 10, "I": 40, "J": 20}
+        for column, width in widths.items():
+            worksheet.column_dimensions[column].width = width
 
-        segment_start = start_row
-        previous_value = worksheet.cell(start_row, start_col).value
-
-        for row_num in range(start_row + 1, end_row + 2):
-            current_value = worksheet.cell(row_num, start_col).value if row_num <= end_row else None
-            should_close = row_num in page_break_rows or current_value != previous_value
-            if should_close:
-                if previous_value and row_num - 1 > segment_start:
-                    worksheet.merge_cells(
-                        start_row=segment_start,
-                        start_column=start_col,
-                        end_row=row_num - 1,
-                        end_column=start_col,
-                    )
-                company_cell = worksheet.cell(segment_start, start_col)
-                company_cell.value = previous_value
-                company_cell.fill = company_fill
-                company_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                segment_start = row_num
-                previous_value = current_value
-
-    merge_adjacent_same_company(1, 3, left_end)
-    merge_adjacent_same_company(6, 3, right_end)
-
-    for row in range(3, last_row + 1):
-        for col in range(1, 11):
-            if worksheet.cell(row, col).value is None:
-                worksheet.cell(row, col).border = body_border
-
-    widths = {
-        "A": 11, "B": 27, "C": 9, "D": 19, "E": 30,
-        "F": 11, "G": 27, "H": 9, "I": 19, "J": 30,
-    }
-    for column, width in widths.items():
-        worksheet.column_dimensions[column].width = width
-
-    worksheet.freeze_panes = "A3"
-    worksheet.sheet_view.showGridLines = False
-    worksheet.print_area = f"A1:J{last_row}"
-    worksheet.print_title_rows = "1:2"
-    worksheet.page_setup.paperSize = worksheet.PAPERSIZE_A4
-    worksheet.page_setup.orientation = worksheet.ORIENTATION_LANDSCAPE
-    worksheet.page_setup.fitToWidth = 1
-    worksheet.page_setup.fitToHeight = 0
-    worksheet.page_setup.blackAndWhite = True
-    worksheet.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
-    for break_row in sorted(page_break_rows):
-        worksheet.row_breaks.append(Break(id=break_row - 1))
-    worksheet.print_options.horizontalCentered = True
-    worksheet.page_margins.left = 0.2
-    worksheet.page_margins.right = 0.2
-    worksheet.page_margins.top = 0.25
-    worksheet.page_margins.bottom = 0.25
-    worksheet.page_margins.header = 0.15
-    worksheet.page_margins.footer = 0.15
+        worksheet.freeze_panes = "A3"
+        worksheet.sheet_view.showGridLines = False
+        worksheet.print_area = f"A1:J{last_row}"
+        worksheet.print_title_rows = "1:2"
+        worksheet.page_setup.paperSize = worksheet.PAPERSIZE_A4
+        worksheet.page_setup.orientation = worksheet.ORIENTATION_LANDSCAPE
+        worksheet.page_setup.fitToWidth = 1
+        worksheet.page_setup.fitToHeight = 0
+        worksheet.page_setup.blackAndWhite = False
+        worksheet.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
+        for break_row in sorted(page_break_rows):
+            worksheet.row_breaks.append(Break(id=break_row - 1))
+        worksheet.print_options.horizontalCentered = True
+        worksheet.page_margins.left = 0.2
+        worksheet.page_margins.right = 0.2
+        worksheet.page_margins.top = 0.25
+        worksheet.page_margins.bottom = 0.25
+        worksheet.page_margins.header = 0.15
+        worksheet.page_margins.footer = 0.15
+        
+    if first_sheet:
+        workbook.active.title = "Trống"
+        
     return workbook
+
 
 
 def process_sheet_format2(ws_source, file_path, date_mode="auto", selected_kitchen=None):
