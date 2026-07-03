@@ -1,4 +1,5 @@
-('C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.pkg',
+('D:\\Documents\\tool chuyển '
+ 'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.pkg',
  {'BINARY': True,
   'DATA': True,
   'EXECUTABLE': True,
@@ -10,31 +11,39 @@
   'SYMLINK': False},
  [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\PYZ-00.pyz',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\struct.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\struct.pyc',
    'PYMODULE'),
   ('pyimod01_archive',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod01_archive.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod01_archive.pyc',
    'PYMODULE'),
   ('pyimod02_importers',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod02_importers.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod02_importers.pyc',
    'PYMODULE'),
   ('pyimod03_ctypes',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod03_ctypes.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod03_ctypes.pyc',
    'PYMODULE'),
   ('pyimod04_pywin32',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod04_pywin32.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod04_pywin32.pyc',
    'PYMODULE'),
   ('pyiboot01_bootstrap',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('pyi_rth_inspect',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
    'PYSOURCE'),
   ('main',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\main.py',
+   'D:\\Documents\\tool chuyển đổi\\ToolChangingFormat\\main.py',
    'PYSOURCE')],
  'python314.dll',
  True,
