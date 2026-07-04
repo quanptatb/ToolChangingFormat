@@ -447,7 +447,9 @@ def normalize_comp(name):
         return ""
     s = str(name).lower()
     s = re.sub(r'[^a-z0-9]', '', s)
-    if 'omdigital' in s or 'odsv' in s or 'osv' in s:
+    if 'odsv' in s:
+        return 'odsv'
+    if 'omdigital' in s or 'osv' in s:
         return 'osv'
     if 'lixil' in s:
         return 'lixil'
