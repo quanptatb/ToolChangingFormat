@@ -231,6 +231,11 @@ def process_sheet_bizen_po(ws):
         # Các cột optional
         khach_hang_col = col_map.get("khach_hang")
         khach_hang = effective_cell_value(ws, lookup, r, khach_hang_col) if khach_hang_col else None
+        if khach_hang:
+            kh_str = str(khach_hang).strip()
+            if kh_str.lower() in ("osv", "odsv"):
+                khach_hang = "ODSV"
+
 
         ca_col = col_map.get("ca")
         ca = effective_cell_value(ws, lookup, r, ca_col) if ca_col else None

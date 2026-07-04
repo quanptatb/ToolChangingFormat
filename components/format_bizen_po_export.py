@@ -149,6 +149,10 @@ def process_sheet_bizen_po_export(ws):
         don_gia_raw = effective_cell_value(ws, lookup, r, col_map["don_gia"])
         thanh_tien_raw = effective_cell_value(ws, lookup, r, col_map["thanh_tien"])
         khach_hang = effective_cell_value(ws, lookup, r, col_map["khach_hang"])
+        if khach_hang:
+            kh_str = str(khach_hang).strip()
+            if kh_str.lower() in ("osv", "odsv"):
+                khach_hang = "ODSV"
         ca_an = effective_cell_value(ws, lookup, r, col_map["ca_an"])
         noi_giao = effective_cell_value(ws, lookup, r, col_map["noi_giao"])
         gio_giao = effective_cell_value(ws, lookup, r, col_map["gio_giao"])
