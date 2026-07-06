@@ -329,7 +329,7 @@ def output_filename_for_format(filename, format_mode):
     input_name = safe_filename(filename)
     stem = Path(input_name).stem
     if format_mode == "format2":
-        return f"{stem} - giay di cho.xlsx"
+        return f"{stem} - format 2.xlsx"
     if format_mode == APPROVAL_FORMAT_MODE:
         return f"{stem} - duyet dinh muc.xlsx"
     if format_mode == "bizen_po":
@@ -442,11 +442,102 @@ def strip_accents(text):
     return ''.join(c for c in normalized if not unicodedata.combining(c))
 
 
+_CUST_LIST_MAP = {}
+
+def load_customer_list_mapping():
+    global _CUST_LIST_MAP
+    if _CUST_LIST_MAP:
+        return _CUST_LIST_MAP
+
+    p = Path("Excel/BIZEN - CATERING_Danh sách khách hàng_Lưới.xlsx")
+    if not p.exists():
+        return {}
+
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(p, data_only=True)
+        ws = wb.active
+
+        # Col B (2) is short code, Col C (3) is full name
+        for r in range(2, ws.max_row + 1):
+            code = ws.cell(r, 2).value
+            fullname = ws.cell(r, 3).value
+            if code and fullname:
+                code_str = str(code).strip().upper()
+                name_str = str(fullname).strip()
+
+                # Add mappings
+                _CUST_LIST_MAP[normalize_comp_basic(code_str)] = code_str
+                _CUST_LIST_MAP[normalize_comp_basic(name_str)] = code_str
+    except Exception as e:
+        print(f"Lỗi khi đọc Danh sách khách hàng: {e}")
+
+    return _CUST_LIST_MAP
+
+def normalize_comp_basic(name):
+    if not name:
+        return ""
+    s = strip_accents(str(name).lower())
+    s = re.sub(r'[^a-z0-9]', '', s)
+    return s
+
 def normalize_comp(name):
     if not name:
         return ""
-    s = str(name).lower()
-    s = re.sub(r'[^a-z0-9]', '', s)
+
+    s_basic = normalize_comp_basic(name)
+
+    # Saitex factories grouping
+    if 'saitex' in s_basic:
+        if '6' in s_basic:
+            return 'saitex 6'
+        if '4' in s_basic or '2' in s_basic or '5' in s_basic:
+            return 'saitex 4'
+        return 'saitex d13'
+
+    # Early check for specific price categories to prevent partial matches by SCAVI/SOFA
+    if 'scavi' in s_basic:
+        if '50' in s_basic:
+            return 'scavicomkhach50k'
+        if '70' in s_basic:
+            return 'scavicomkhach70k'
+    if 'sofa' in s_basic:
+        if '40' in s_basic or 'ql' in s_basic:
+            return 'sofacomql40k'
+
+    # Format 2 template aliases. Keep these before the dynamic customer list so
+    # source codes and template labels always land in the same fixed slots.
+    alias_map = {
+        "catthai": "catthai",
+        "ctthai": "catthai",
+        "ctthi": "catthai",
+        "quadrille": "quadrille",
+        "quarille": "quadrille",
+        "7a": "shisedo7a",
+        "ft": "shisedo7a",
+        "shiseido": "shisedo7a",
+        "shisedo": "shisedo7a",
+        "shishedo": "shisedo7a",
+        "shiseido7a": "shisedo7a",
+        "shisedo7a": "shisedo7a",
+        "shishedo7a": "shisedo7a",
+    }
+    if s_basic in alias_map:
+        return alias_map[s_basic]
+
+    # 1. Try dynamic customer list lookup
+    cust_map = load_customer_list_mapping()
+
+    if s_basic in cust_map:
+        return cust_map[s_basic].lower()
+
+    # Substring matching
+    for k, code in cust_map.items():
+        if s_basic and (s_basic in k or k in s_basic):
+            return code.lower()
+
+    # 2. Fall back to hardcoded regex rules
+    s = s_basic
     if 'omdigital' in s or 'odsv' in s or 'osv' in s:
         return 'osv'
     if 'lixil' in s:

@@ -407,18 +407,10 @@ index_html = """<!doctype html>
         </label>
         <div class="options-row">
           <div class="control-group">
-            <label for="kitchen">Lựa chọn bếp</label>
-            <select id="kitchen" name="kitchen">
-              <option value="bep_tai_cho" selected>Bếp tại chỗ</option>
-              <option value="bep_trung_tam">Bếp trung tâm</option>
-              <option value="bep_trung_tam_2">Bếp trung tâm 2</option>
-            </select>
-          </div>
-          <div class="control-group">
             <label for="format_mode">Bố cục xuất file</label>
             <select id="format_mode" name="format_mode">
               <option value="format1" selected>Format 1 (Bảng A4 dọc 13 cột + dòng ngày)</option>
-              <option value="format2">Format 2 (Giấy đi chợ)</option>
+              <option value="format2">Format 2 (Theo mẫu)</option>
               <option value="duyet_dinh_muc">Duyệt định mức (A4 ngang, gộp món liền kề)</option>
               <option value="bizen_po">BIZEN PO Lưới (Đặt hàng 9 cột)</option>
               <option value="bizen_po_export">BIZEN PO Xuất (Có mẫu)</option>
@@ -432,7 +424,7 @@ index_html = """<!doctype html>
       </form>
       <div class="steps">
         <div class="step"><strong>1. Chọn file</strong>File BOM Excel cần in.</div>
-        <div class="step"><strong>2. Xuất file</strong>Chọn Format 1, Format 2 hoặc Duyệt định mức rồi tải file.</div>
+        <div class="step"><strong>2. Xuất file</strong>Chọn bố cục cần dùng rồi tải file.</div>
         <div class="step"><strong>3. In A4</strong>Mở file tải về rồi in theo thiết lập sẵn.</div>
       </div>
     </section>
@@ -569,7 +561,6 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
             if not file_bytes:
                 raise ValueError("Vui lòng chọn file Excel trước khi xuất.")
 
-            kitchen_opt = fields.get("kitchen", "bep_tai_cho")
             format_opt = fields.get("format_mode", "format1")
 
             # ---------------- DIAGNOSTIC LOGGING ----------------
@@ -594,15 +585,8 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
                     f.write(f"Error logging headers: {e}\n")
             # ----------------------------------------------------
 
-            if kitchen_opt == "bep_trung_tam":
-                selected_kitchen = "Bếp trung tâm"
-            elif kitchen_opt == "bep_trung_tam_2":
-                selected_kitchen = "Bếp trung tâm 2"
-            else:
-                selected_kitchen = "Bếp tại chỗ"
-
             output_bytes = format_workbook_bytes(
-                file_bytes, filename, date_mode="auto", format_mode=format_opt, selected_kitchen=selected_kitchen
+                file_bytes, filename, date_mode="auto", format_mode=format_opt
             )
             download_name = output_filename_for_format(filename, format_opt)
             content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -675,7 +659,7 @@ def run_batch():
         else:
             outputs = (
                 ("format1", f"{file_path.stem} - da dinh dang.xlsx", "Format 1"),
-                ("format2", f"{file_path.stem} - giay di cho.xlsx", "Format 2"),
+                ("format2", f"{file_path.stem} - format 2.xlsx", "Format 2"),
                 (APPROVAL_FORMAT_MODE, f"{file_path.stem} - duyet dinh muc.xlsx", "Duyệt định mức"),
             )
         for format_mode, output_name, label in outputs:

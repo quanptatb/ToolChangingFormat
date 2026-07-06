@@ -1,0 +1,195 @@
+
+--- 2026-07-03 09:22:52.258202 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN bếp tại chỗ (không chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:25:30.519135 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN bếp tại chỗ (không chay).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:26:41.074677 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN bếp tại chỗ (không chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:34:50.257460 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN bếp tại chỗ (không chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:40:21.201549 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN bếp tại chỗ (không chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:50:19.532074 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN all bếp(chỉ có chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:51:52.831729 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN all bếp(chỉ có chay).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 09:59:03.909208 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 10:08:24.476340 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 10:13:44.917126 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 11:23:36.193943 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 12:03:56.593264 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 12:04:15.735138 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 12:11:34.651023 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 13:35:03.406811 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 14:33:44.118521 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 14:39:54.734759 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 14:54:02.720708 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 14:54:21.670202 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 14:58:14.069091 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 15:03:13.987173 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 15:03:33.193922 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-03 17:57:07.136014 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table.xlsx
+Format mode selected: bizen_po_export
+Headers row 1: ['No.', 'Ngày', 'Mã PO', 'Nhà cung cấp', 'Mã nguyên vật liệu', 'Tên nguyên vật liệu', 'Đơn vị tính', 'Nơi giao hàng (Khách hàng)', 'Khách hàng', 'Ca', 'Giờ giao hàng', 'Sum: Khối lượng đặt hàng', 'Sum: Đơn giá', 'Sum: Thành tiền', 'SourceID', 'Sum: Thuế VAT', 'Sum: Thành tiền sau thuế']
+
+--- 2026-07-04 08:22:11.385058 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 09:00:57.484622 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 10:50:34.231319 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 10:52:56.373079 ---
+Uploaded file: Lệnh sản xuất (SO - PR)_IN (đầy đủ)_4-7.xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 10:53:04.113833 ---
+Uploaded file: Lệnh sản xuất (SO - PR)_IN (đầy đủ)_4-7.xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:02:12.600739 ---
+Uploaded file: Lệnh sản xuất (SO - PR)_IN (đầy đủ)_4-7.xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:02:23.057007 ---
+Uploaded file: Lệnh sản xuất (SO - PR)_IN (đầy đủ)_4-7.xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:02:37.509345 ---
+Uploaded file: Lệnh sản xuất (SO - PR)_IN (đầy đủ)_4-7.xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:44:59.626447 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:45:12.467848 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:50:51.220911 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 11:51:02.686096 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 14:34:40.641762 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 14:34:48.042839 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 14:35:02.291864 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ).xlsx
+Format mode selected: format1
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-04 14:56:04.870420 ---
+Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ) (1).xlsx
+Format mode selected: format2
+Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']

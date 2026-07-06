@@ -51,10 +51,10 @@ Bo file `.xlsx`, `.xlsm`, hoac `.csv` vao thu muc `Excel`, roi chay:
 python main.py --batch
 ```
 
-Ket qua se nam trong thu muc `Đã gộp`. Moi file dau vao se xuat 3 dinh dang:
+Ket qua se nam trong thu muc `Đã gộp`. Moi file dau vao se xuat cac dinh dang:
 
 - `Format 1`: Bang A4 doc 13 cot + dong ngay, `- da dinh dang.xlsx`
-- `Format 2`: `- giay di cho.xlsx`
+- `Format 2`: Theo mau `Mẫu/Mẫu format 2.xlsx`, `- format 2.xlsx`
 - `Duyet dinh muc`: Bang A4 ngang de duyet thu vien BOM, gop cac mon an lien ke, `- duyet dinh muc.xlsx`
 
 ## Luu y

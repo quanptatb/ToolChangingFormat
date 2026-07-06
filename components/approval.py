@@ -192,7 +192,7 @@ def estimate_wrapped_lines(value, chars_per_line):
 
 
 def apply_approval_base_format(ws, last_row):
-    thin_gray = Side(style="thin", color="B7C0CC")
+    thin_gray = Side(style="thin", color="D9D9D9")
     medium_gray = Side(style="medium", color="6B7280")
     border = Border(left=thin_gray, right=thin_gray, top=thin_gray, bottom=thin_gray)
     header_border = Border(left=thin_gray, right=thin_gray, top=medium_gray, bottom=medium_gray)
@@ -314,7 +314,7 @@ def merge_approval_runs(ws, rows, page_break_rows=None):
         should_close = row in page_break_rows or current_key != previous_key or previous_key is None
         if should_close:
             end = row - 1
-            for col in (5, 6, 7):
+            for col in (1, 2, 3, 4, 5, 6, 7, 14):
                 merge_col(start, end, col)
             start = row
             previous_key = current_key
