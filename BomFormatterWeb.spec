@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('file định dạng fotmat chuyển đổi chính.xlsx', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

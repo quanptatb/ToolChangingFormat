@@ -1,4 +1,5 @@
 import os
+import sys
 from copy import copy
 from collections import defaultdict
 from openpyxl import Workbook, load_workbook
@@ -183,7 +184,11 @@ def process_sheet_bizen_po_export(ws):
     if not grouped_data:
         raise ValueError("Không có dữ liệu PO.")
 
-    template_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "file định dạng fotmat chuyển đổi chính.xlsx")
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        template_path = os.path.join(sys._MEIPASS, "file định dạng fotmat chuyển đổi chính.xlsx")
+    else:
+        template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "file định dạng fotmat chuyển đổi chính.xlsx")
+        
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Không tìm thấy file mẫu tại {template_path}")
 

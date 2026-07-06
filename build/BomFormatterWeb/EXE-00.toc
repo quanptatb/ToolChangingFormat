@@ -1,8 +1,10 @@
-('C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.exe',
+('D:\\Documents\\tool chuyển '
+ 'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.exe',
  True,
  False,
  True,
- 'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-console.ico',
+ 'D:\\Documents\\tool chuyển '
+ 'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-console.ico',
  None,
  False,
  False,
@@ -29,40 +31,54 @@
  None,
  None,
  None,
- 'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.pkg',
+ 'D:\\Documents\\tool chuyển '
+ 'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\BomFormatterWeb.pkg',
  [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\PYZ-00.pyz',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\struct.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\struct.pyc',
    'PYMODULE'),
   ('pyimod01_archive',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod01_archive.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod01_archive.pyc',
    'PYMODULE'),
   ('pyimod02_importers',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod02_importers.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod02_importers.pyc',
    'PYMODULE'),
   ('pyimod03_ctypes',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod03_ctypes.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod03_ctypes.pyc',
    'PYMODULE'),
   ('pyimod04_pywin32',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod04_pywin32.pyc',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\build\\BomFormatterWeb\\localpycs\\pyimod04_pywin32.pyc',
    'PYMODULE'),
   ('pyiboot01_bootstrap',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('pyi_rth_inspect',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
    'PYSOURCE'),
   ('main',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\main.py',
+   'D:\\Documents\\tool chuyển đổi\\ToolChangingFormat\\main.py',
    'PYSOURCE')],
  [],
  False,
  False,
+<<<<<<< HEAD
  1782882758,
+=======
+ 1783124275,
+>>>>>>> 2fea40091387a91f2d9f329ad4ca69f5305085d6
  [('run.exe',
-   'C:\\Users\\Cua\\Desktop\\proj\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],
- 'C:\\Users\\Cua\\AppData\\Local\\Python\\pythoncore-3.14-64\\python314.dll')
+ 'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\python314.dll')

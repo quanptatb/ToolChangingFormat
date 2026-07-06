@@ -13,7 +13,7 @@ if errorlevel 1 goto failed
 if errorlevel 1 goto failed
 
 echo Dong goi file exe...
-".build-venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean --onedir --name BomFormatterWeb main.py
+".build-venv\Scripts\python.exe" -m PyInstaller --noconfirm --clean BomFormatterWeb.spec
 if errorlevel 1 goto failed
 
 copy /Y start_web.bat dist\BomFormatterWeb\start_web.bat >nul
