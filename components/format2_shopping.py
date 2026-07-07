@@ -35,7 +35,9 @@ def normalize_template_shift_or_category(val):
         return "chay"
     if "trangmieng" in s or "tmieng" in s:
         return "trangmieng"
-    if "nuoc" in s or "chao" in s:
+    if "chao" in s:
+        return "chao"
+    if "nuoc" in s:
         return "nuoc"
     if "caithien" in s:
         return "cai_thien"
@@ -90,6 +92,78 @@ def get_row_shift(ws, lookup, r, shift_col, sheet_name=None, panel_idx=None):
             return v
 
     return None
+
+def infer_template_category_from_dish_hint(value):
+    text = strip_accents(str(value or "").lower())
+    if not text:
+        return ""
+    compact = text.replace(" ", "").replace(",", "").replace(".", "").replace("-", "")
+
+    if "monchao" in compact or "suatchao" in compact:
+        return "chao"
+    if "monnuoc" in compact or "suatnuoc" in compact:
+        return "nuoc"
+    if "monchay" in compact or "suatchay" in compact:
+        return "chay"
+    if "trangmieng" in compact or "tmieng" in compact:
+        return "trangmieng"
+    if "caithien" in compact:
+        return "cai_thien"
+    return ""
+
+def find_format2_fallback_data_rows(grouped_data, sheet_name, comp_norm, key_norm):
+    data_rows = grouped_data.get((sheet_name, comp_norm, key_norm), [])
+    if data_rows:
+        return data_rows
+
+    if key_norm.startswith("chay_"):
+        for fallback_key in ("chay_ca1", "chay_ca2", "chay_ca3", "chay"):
+            if fallback_key == key_norm:
+                continue
+            data_rows = grouped_data.get((sheet_name, comp_norm, fallback_key), [])
+            if data_rows:
+                return data_rows
+
+    return []
+
+def format2_cell_has_border(cell):
+    border = cell.border
+    return any(
+        side is not None and side.style
+        for side in (border.left, border.right, border.top, border.bottom)
+    )
+
+def row_has_format2_panel_frame(ws, row, cols):
+    for col in cols:
+        cell = ws.cell(row, col)
+        if isinstance(cell, MergedCell):
+            continue
+        if format2_cell_has_border(cell):
+            return True
+    return False
+
+def compact_format2_dishes_for_slots(dishes, slot_count):
+    if slot_count <= 0:
+        return []
+    if len(dishes) <= slot_count:
+        return dishes
+
+    def join_values(items, key):
+        values = [
+            str(item.get(key) or "").strip()
+            for item in items
+            if str(item.get(key) or "").strip()
+        ]
+        return "\n".join(values)
+
+    compacted = [dict(dish) for dish in dishes[:slot_count - 1]]
+    overflow = dishes[slot_count - 1:]
+    compacted.append({
+        "qty": join_values(overflow, "qty"),
+        "mon": join_values(overflow, "mon"),
+        "recipe": join_values(overflow, "recipe"),
+    })
+    return compacted
 
 def format_single_ingredient_quota(amount, unit, short_name):
     amt_str = format_number_clean(amount)
@@ -1281,7 +1355,7 @@ def group_format2_records_for_fill_only(all_parsed_rows):
                 if not cat:
                     cat = normalize_template_shift_or_category(ca)
 
-                if cat in ["nuoc", "trangmieng", "cai_thien", "chay"]:
+                if cat in ["nuoc", "chao", "trangmieng", "cai_thien", "chay"]:
                     ca_clean = normalize_template_shift_or_category(ca)
                     if ca_clean not in ["ca1", "ca2", "ca3"]:
                         ca_clean = "ca1"
@@ -1302,7 +1376,11 @@ def build_fill_only_template_groups(ws, sheet_name, spec):
         if veggie_start:
             end_row = veggie_start - 1
 
+    frame_cols = [spec["company_col"], spec["shift_col"], *spec["data_cols"]]
     for row in range(3, end_row + 1):
+        if not row_has_format2_panel_frame(ws, row, frame_cols):
+            continue
+
         cty_val = get_row_company(ws, lookup, row, spec["company_col"])
         if not cty_val:
             continue
@@ -1310,7 +1388,12 @@ def build_fill_only_template_groups(ws, sheet_name, spec):
         shift_val = get_row_shift(ws, lookup, row, spec["shift_col"], sheet_name, spec["panel_idx"])
         comp_norm = normalize_comp(cty_val)
         cat = normalize_template_shift_or_category(shift_val) if shift_val else ""
-        if cat in ["nuoc", "trangmieng", "cai_thien", "chay"]:
+        hint_cat = infer_template_category_from_dish_hint(
+            effective_cell_value(ws, lookup, row, spec["data_cols"][1])
+        )
+        if hint_cat and cat in ["ca1", "ca2", "ca3"]:
+            key_norm = f"{hint_cat}_{cat}"
+        elif cat in ["nuoc", "chao", "trangmieng", "cai_thien", "chay"]:
             active_main = get_row_active_main_shift(ws, lookup, row, spec["shift_col"])
             key_norm = f"{cat}_{active_main}"
         else:
@@ -1320,9 +1403,17 @@ def build_fill_only_template_groups(ws, sheet_name, spec):
 
     return groups
 
-def clear_fill_only_data_slots(ws, sheet_name):
-    for spec in get_fill_only_panel_specs(sheet_name):
-        groups = build_fill_only_template_groups(ws, sheet_name, spec)
+def build_fill_only_template_group_specs(ws, sheet_name):
+    return [
+        (spec, build_fill_only_template_groups(ws, sheet_name, spec))
+        for spec in get_fill_only_panel_specs(sheet_name)
+    ]
+
+def clear_fill_only_data_slots(ws, sheet_name, panel_groups=None):
+    if panel_groups is None:
+        panel_groups = build_fill_only_template_group_specs(ws, sheet_name)
+
+    for spec, groups in panel_groups:
         for row_list in groups.values():
             for row in row_list:
                 for col in spec["data_cols"]:
@@ -1352,15 +1443,18 @@ def fill_template_header_dates_only(ws, all_parsed_rows):
     set_existing_cell_value(ws, 1, 4, weekday_str)
     set_existing_cell_value(ws, 1, 6, date_str)
 
-def fill_standard_template_slots_only(ws, sheet_name, grouped_data):
-    for spec in get_fill_only_panel_specs(sheet_name):
-        groups = build_fill_only_template_groups(ws, sheet_name, spec)
+def fill_standard_template_slots_only(ws, sheet_name, grouped_data, panel_groups=None):
+    if panel_groups is None:
+        panel_groups = build_fill_only_template_group_specs(ws, sheet_name)
+
+    for spec, groups in panel_groups:
         qty_col, dish_col, weight_col = spec["data_cols"]
         for (comp_norm, key_norm), row_list in groups.items():
-            data_rows = grouped_data.get((sheet_name, comp_norm, key_norm), [])
+            data_rows = find_format2_fallback_data_rows(grouped_data, sheet_name, comp_norm, key_norm)
             if not data_rows:
                 continue
             dishes = format_group_dishes(data_rows[0].get("ma_kh"), data_rows)
+            dishes = compact_format2_dishes_for_slots(dishes, len(row_list))
             for row, dish in zip(row_list, dishes):
                 set_existing_cell_value(ws, row, qty_col, dish["qty"])
                 set_existing_cell_value(ws, row, dish_col, dish["mon"])
@@ -1406,6 +1500,170 @@ def preserve_blank_styled_cells(ws, original_cell_keys):
         if cell.value is None:
             cell.value = ""
 
+def capitalize_first_alpha_per_line(value):
+    if not isinstance(value, str) or not value or value.startswith("="):
+        return value
+
+    result = []
+    for line in value.split("\n"):
+        chars = list(line)
+        for idx, char in enumerate(chars):
+            if char.isspace():
+                continue
+            if char.isalpha():
+                chars[idx] = char.upper()
+            break
+        result.append("".join(chars))
+    return "\n".join(result)
+
+def capitalize_format2_text_cells(ws, sheet_name):
+    max_col = 9 if sheet_name == "Bếp trung tâm 2" else 10
+    for row in range(1, ws.max_row + 1):
+        for col in range(1, max_col + 1):
+            cell = ws.cell(row, col)
+            if isinstance(cell, MergedCell):
+                continue
+            cell.value = capitalize_first_alpha_per_line(cell.value)
+
+def get_format2_print_data_columns(sheet_name):
+    if sheet_name == "Bếp trung tâm 2":
+        return (2, 3, 4, 5, 6, 7, 8, 9)
+    return (3, 4, 5, 8, 9, 10)
+
+def tune_format2_print_columns(ws, sheet_name):
+    if sheet_name == "Bếp tại chỗ":
+        widths = {
+            "A": 6, "B": 7, "C": 9, "D": 38, "E": 40,
+            "F": 6, "G": 7, "H": 18, "I": 38, "J": 40,
+        }
+    elif sheet_name == "Bếp trung tâm":
+        widths = {"D": 58, "E": 24, "I": 58, "J": 24}
+    elif sheet_name == "Bếp trung tâm 2":
+        widths = {
+            "A": 9, "B": 13, "C": 14, "D": 42, "E": 26,
+            "F": 14, "G": 10, "H": 42, "I": 26,
+        }
+    else:
+        widths = {}
+    for col_letter, width in widths.items():
+        ws.column_dimensions[col_letter].width = width
+
+def apply_format2_readable_fonts_and_wrap(ws, sheet_name):
+    max_col = 9 if sheet_name == "Bếp trung tâm 2" else 10
+    center_cols = {1, 2, 3, 6, 7, 8}
+    if sheet_name == "Bếp trung tâm 2":
+        center_cols = {1, 2, 3, 4, 6, 7}
+
+    for row in range(1, ws.max_row + 1):
+        for col in range(1, max_col + 1):
+            cell = ws.cell(row, col)
+            if isinstance(cell, MergedCell):
+                continue
+
+            font = copy(cell.font)
+            font_name = "Aptos Narrow"
+            if row == 1:
+                font_size = 11
+            elif row == 2:
+                font_size = 10
+            elif sheet_name == "Bếp tại chỗ":
+                font_size = 9.5
+            elif sheet_name == "Bếp trung tâm 2":
+                font_size = 9 if row >= 41 and col in {5, 6} else 9.5
+            else:
+                font_size = 9
+
+            cell.font = Font(
+                name=font_name,
+                size=font_size,
+                bold=font.bold,
+                italic=font.italic,
+                color=font.color,
+            )
+
+            horizontal = "center" if col in center_cols else "left"
+            vertical = "center" if row <= 2 or col in center_cols else "top"
+            cell.alignment = Alignment(
+                horizontal=horizontal,
+                vertical=vertical,
+                wrap_text=True,
+                text_rotation=cell.alignment.text_rotation,
+            )
+
+def optimize_format2_row_heights_for_print(ws, sheet_name):
+    data_cols = get_format2_print_data_columns(sheet_name)
+    empty_height = 4 if sheet_name == "Bếp tại chỗ" else 6
+
+    if ws.max_row >= 1:
+        ws.row_dimensions[1].height = 18 if sheet_name == "Bếp tại chỗ" else 20
+    if ws.max_row >= 2:
+        ws.row_dimensions[2].height = 20
+
+    for row in range(3, ws.max_row + 1):
+        values = [ws.cell(row, col).value for col in data_cols]
+        if not any(value not in (None, "") for value in values):
+            ws.row_dimensions[row].height = empty_height
+            continue
+
+        max_lines = 1
+        for col, value in zip(data_cols, values):
+            if value in (None, ""):
+                continue
+            cell = ws.cell(row, col)
+            cell.alignment = copy(cell.alignment)
+            cell.alignment = Alignment(
+                horizontal=cell.alignment.horizontal,
+                vertical=cell.alignment.vertical or "top",
+                wrap_text=True,
+                text_rotation=cell.alignment.text_rotation,
+            )
+            col_letter = get_column_letter(col)
+            width = ws.column_dimensions[col_letter].width or 12
+            font_size = float(cell.font.sz or 11)
+            chars_per_line = max(6, int(width * 11 / font_size * 1.05))
+            wrapped_lines = 0
+            for line in str(value).split("\n"):
+                wrapped_lines += max(1, (len(line) + chars_per_line - 1) // chars_per_line)
+            max_lines = max(max_lines, wrapped_lines)
+
+        if sheet_name == "Bếp tại chỗ":
+            ws.row_dimensions[row].height = min(46, max(20, max_lines * 12 + 6))
+        elif sheet_name == "Bếp trung tâm 2" and row >= 41:
+            ws.row_dimensions[row].height = min(58, max(20, max_lines * 9 + 6))
+        else:
+            ws.row_dimensions[row].height = min(38, max(18, max_lines * 9 + 6))
+
+def configure_format2_one_page_print(ws, sheet_name):
+    max_print_col = 9 if sheet_name == "Bếp trung tâm 2" else 10
+    max_print_row = ws.max_row
+    while max_print_row > 1:
+        has_content_or_style = False
+        for col in range(1, max_print_col + 1):
+            cell = ws.cell(max_print_row, col)
+            if cell.value not in (None, "") or cell.has_style:
+                has_content_or_style = True
+                break
+        if has_content_or_style:
+            break
+        max_print_row -= 1
+
+    ws.print_area = f"A1:{get_column_letter(max_print_col)}{max_print_row}"
+    ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+    ws.page_setup.paperSize = ws.PAPERSIZE_A4
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 1
+    ws.sheet_properties.pageSetUpPr.fitToPage = True
+    ws.sheet_properties.pageSetUpPr.autoPageBreaks = False
+    ws.page_margins.left = 0.12
+    ws.page_margins.right = 0.12
+    ws.page_margins.top = 0.18
+    ws.page_margins.bottom = 0.18
+    ws.page_margins.header = 0
+    ws.page_margins.footer = 0
+    ws.print_options.horizontalCentered = True
+    ws.print_options.verticalCentered = False
+    ws.sheet_view.showGridLines = False
+
 def populate_template_workbook_fill_only(all_parsed_rows, selected_kitchen=None):
     template_path = Path("Mẫu/Mẫu format 2.xlsx")
     if not template_path.exists():
@@ -1422,12 +1680,18 @@ def populate_template_workbook_fill_only(all_parsed_rows, selected_kitchen=None)
         if sheet_name not in ["Bếp tại chỗ", "Bếp trung tâm", "Bếp trung tâm 2"]:
             continue
         ws = wb[sheet_name]
-        clear_fill_only_data_slots(ws, sheet_name)
+        panel_groups = build_fill_only_template_group_specs(ws, sheet_name)
+        clear_fill_only_data_slots(ws, sheet_name, panel_groups)
         fill_template_header_dates_only(ws, all_parsed_rows)
-        fill_standard_template_slots_only(ws, sheet_name, grouped_data)
+        fill_standard_template_slots_only(ws, sheet_name, grouped_data, panel_groups)
         if sheet_name == "Bếp trung tâm 2":
             fill_central_veggie_template_slots_only(ws, central_veggie_rows)
         preserve_blank_styled_cells(ws, original_cell_keys_by_sheet[sheet_name])
+        capitalize_format2_text_cells(ws, sheet_name)
+        tune_format2_print_columns(ws, sheet_name)
+        apply_format2_readable_fonts_and_wrap(ws, sheet_name)
+        optimize_format2_row_heights_for_print(ws, sheet_name)
+        configure_format2_one_page_print(ws, sheet_name)
 
     if selected_kitchen and selected_kitchen != "Đầy đủ dữ liệu":
         for name in list(wb.sheetnames):
@@ -1505,7 +1769,7 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
                     if not cat:
                         cat = normalize_template_shift_or_category(ca)
 
-                    if cat in ["nuoc", "trangmieng", "cai_thien", "chay"]:
+                    if cat in ["nuoc", "chao", "trangmieng", "cai_thien", "chay"]:
                         ca_clean = normalize_template_shift_or_category(ca)
                         if ca_clean not in ["ca1", "ca2", "ca3"]:
                             ca_clean = "ca1"
@@ -1554,14 +1818,23 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
         for panel_idx, start_col in enumerate([p1_start, p2_start], start=1):
             lookup = merged_value_lookup(ws)
             template_groups = defaultdict(list)
+            frame_cols = list(range(start_col, start_col + 5))
             for r in range(3, ws.max_row + 1):
+                if not row_has_format2_panel_frame(ws, r, frame_cols):
+                    continue
+
                 cty_val = get_row_company(ws, lookup, r, start_col)
                 shift_val = get_row_shift(ws, lookup, r, start_col + 1, sheet_name, panel_idx)
 
                 if cty_val:
                     comp_norm = normalize_comp(cty_val)
                     cat = normalize_template_shift_or_category(shift_val) if shift_val else ""
-                    if cat in ["nuoc", "trangmieng", "cai_thien", "chay"]:
+                    hint_cat = infer_template_category_from_dish_hint(
+                        effective_cell_value(ws, lookup, r, start_col + 3)
+                    )
+                    if hint_cat and cat in ["ca1", "ca2", "ca3"]:
+                        key_norm = f"{hint_cat}_{cat}"
+                    elif cat in ["nuoc", "chao", "trangmieng", "cai_thien", "chay"]:
                         active_main = get_row_active_main_shift(ws, lookup, r, start_col + 1)
                         key_norm = f"{cat}_{active_main}"
                     else:
@@ -1676,11 +1949,12 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
                     template_groups[(c_key, "")].extend(rows)
 
             for (comp_norm, key_norm), row_list in template_groups.items():
-                data_rows = grouped_data.get((sheet_name, comp_norm, key_norm), [])
+                data_rows = find_format2_fallback_data_rows(grouped_data, sheet_name, comp_norm, key_norm)
 
                 dishes_data = []
                 if data_rows:
                     dishes_data = format_group_dishes(data_rows[0].get("ma_kh"), data_rows)
+                    dishes_data = compact_format2_dishes_for_slots(dishes_data, len(row_list))
 
                 # Determine custom ca_display
                 ca_display = ca_display_map.get((comp_norm, key_norm))
@@ -1693,6 +1967,8 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
                 if not ca_display:
                     if key_norm.startswith("chay"):
                         ca_display = "Chay"
+                    elif key_norm.startswith("chao"):
+                        ca_display = "M.cháo"
                     elif key_norm.startswith("nuoc"):
                         ca_display = "M.nước"
                     elif key_norm.startswith("trangmieng"):
@@ -1779,6 +2055,11 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
         if sheet_name == "Bếp trung tâm 2":
             append_central_veggie_table(ws, all_parsed_rows)
         apply_reference_menu_style(ws, sheet_name)
+        capitalize_format2_text_cells(ws, sheet_name)
+        tune_format2_print_columns(ws, sheet_name)
+        apply_format2_readable_fonts_and_wrap(ws, sheet_name)
+        optimize_format2_row_heights_for_print(ws, sheet_name)
+        configure_format2_one_page_print(ws, sheet_name)
 
     if selected_kitchen and selected_kitchen != "Đầy đủ dữ liệu":
         for name in list(wb.sheetnames):
