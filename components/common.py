@@ -484,7 +484,6 @@ def normalize_comp_basic(name):
 def normalize_comp(name):
     if not name:
         return ""
-<<<<<<< HEAD
 
     s_basic = normalize_comp_basic(name)
 
@@ -539,14 +538,9 @@ def normalize_comp(name):
 
     # 2. Fall back to hardcoded regex rules
     s = s_basic
-    if 'omdigital' in s or 'odsv' in s or 'osv' in s:
-=======
-    s = str(name).lower()
-    s = re.sub(r'[^a-z0-9]', '', s)
     if 'odsv' in s:
         return 'odsv'
     if 'omdigital' in s or 'osv' in s:
->>>>>>> 2fea40091387a91f2d9f329ad4ca69f5305085d6
         return 'osv'
     if 'lixil' in s:
         return 'lixil'
