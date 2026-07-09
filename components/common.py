@@ -46,6 +46,9 @@ visible_column_widths = {
 hidden_print_columns = ("A", "B", "L")
 
 APPROVAL_FORMAT_MODE = "duyet_dinh_muc"
+QUANTITY_MODE_APPROVED = "approved"
+QUANTITY_MODE_FORECAST = "forecast"
+QUANTITY_MODE_DEFAULT = QUANTITY_MODE_APPROVED
 
 SHORT_NAMES = {
     "thịt heo nạc vai": "nạc",
@@ -121,6 +124,15 @@ def ensure_visible_worksheet(workbook, preferred=None):
 
     workbook.active = active_sheet
     return active_sheet
+
+
+def normalize_quantity_mode(value):
+    mode = str(value or "").strip().lower().replace("-", "_")
+    if mode in {"forecast", "du_bao", "du_bao_qty", "quantity_forecast"}:
+        return QUANTITY_MODE_FORECAST
+    if mode in {"approved", "co_nga_duyet", "nga_duyet", "duyet", "quantity_approved"}:
+        return QUANTITY_MODE_APPROVED
+    return QUANTITY_MODE_DEFAULT
 
 
 def normalized_value(raw_value, previous_value=None):

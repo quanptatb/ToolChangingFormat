@@ -15,7 +15,8 @@ from .common import (
     unmerge_group_columns, get_lixil_site_order, text_key, get_co_cau_order,
     meal_type_label, is_generic_meal_label, normalized_value,
     merged_value_lookup, effective_cell_value, to_numeric, clean_ingredient_name,
-    normalize_shift, get_shift_order, save_workbook, parse_print_number, a4_row_empty
+    normalize_shift, get_shift_order, save_workbook, parse_print_number, a4_row_empty,
+    normalize_quantity_mode, QUANTITY_MODE_FORECAST
 )
 
 A4_OUTPUT_HEADERS = [
@@ -629,14 +630,19 @@ def find_a4_source_columns(ws):
         "site",
         "structure",
         "dish",
-        "quantity",
         "ingredient",
         "norm",
         "unit",
         "required",
         "purchase_unit",
     }
-    optional_keys = {"approved", "committed_norm"}
+    optional_keys = {
+        "approved",
+        "committed_norm",
+        "quantity",
+        "approved_quantity",
+        "forecast_quantity",
+    }
 
     for row in range(1, min(ws.max_row, 10) + 1):
         columns = {}
@@ -658,6 +664,13 @@ def find_a4_source_columns(ws):
                 columns.setdefault("site", col)
             elif matches(header_text, ("mon an", "ten mon"), ("co cau", "nhom mon", "loai mon")):
                 dish_candidates.append(col)
+            elif matches(
+                header_text,
+                ("so luong co nga duyet", "s.luong co nga duyet", "co nga duyet", "nga duyet"),
+            ):
+                columns.setdefault("approved_quantity", col)
+            elif matches(header_text, ("so luong du bao", "s.luong du bao", "du bao")):
+                columns.setdefault("forecast_quantity", col)
             elif matches(header_text, ("so luong", "qty", "quantity")):
                 columns.setdefault("quantity", col)
             elif matches(header_text, ("nguyen vat lieu", "nguyen lieu", "nvl")):
@@ -692,22 +705,49 @@ def find_a4_source_columns(ws):
         if ingredient_candidates:
             columns["ingredient"] = choose_a4_ingredient_column(ws, row, ingredient_candidates)
 
-        if required_keys.issubset(columns):
+        has_quantity = any(
+            key in columns for key in ("approved_quantity", "forecast_quantity", "quantity")
+        )
+        if required_keys.issubset(columns) and has_quantity:
             for key in optional_keys:
                 columns.setdefault(key, None)
             return row, columns
 
     missing = ", ".join(sorted(required_keys))
-    raise ValueError(f"Không tìm thấy đủ cột nguồn để xuất Format 1 A4: {missing}.")
+    raise ValueError(f"Không tìm thấy đủ cột nguồn để xuất Format 1 A4: {missing}, quantity.")
+
+def selected_a4_quantity(raw, columns, quantity_mode):
+    if normalize_quantity_mode(quantity_mode) == QUANTITY_MODE_FORECAST:
+        selected_key = "forecast_quantity"
+        fallback_keys = ("quantity", "approved_quantity")
+    else:
+        selected_key = "approved_quantity"
+        fallback_keys = ("quantity", "forecast_quantity")
+
+    if columns.get(selected_key) is not None:
+        return raw.get(selected_key)
+    for key in fallback_keys:
+        if columns.get(key) is not None:
+            return raw.get(key)
+    return None
 
 
-
-
-def collect_a4_records(ws):
+def collect_a4_records(ws, quantity_mode=None):
     header_row_idx, columns = find_a4_source_columns(ws)
     lookup = merged_value_lookup(ws)
     records = []
-    previous = {key: None for key in ("date", "customer", "shift", "site", "structure", "dish", "quantity")}
+    group_keys = ("date", "customer", "shift", "site", "structure", "dish")
+    quantity_keys = ("quantity", "approved_quantity", "forecast_quantity")
+    previous = {
+        key: None
+        for key in group_keys
+        if key in columns
+    }
+    previous_quantities = {
+        key: (None, None)
+        for key in quantity_keys
+        if columns.get(key) is not None
+    }
 
     for source_row in range(header_row_idx + 1, ws.max_row + 1):
         raw = {
@@ -718,6 +758,16 @@ def collect_a4_records(ws):
             raw[key] = normalized_value(raw.get(key), previous[key])
             previous[key] = raw[key]
 
+        group_key = tuple(text_key(raw.get(key)) for key in group_keys)
+        for key in previous_quantities:
+            value = raw.get(key)
+            if value is None or str(value).strip() == "":
+                previous_group, previous_value = previous_quantities[key]
+                if previous_group == group_key:
+                    raw[key] = previous_value
+            else:
+                previous_quantities[key] = (group_key, value)
+
         values = [
             raw["date"],
             raw["customer"],
@@ -725,7 +775,7 @@ def collect_a4_records(ws):
             raw["site"],
             meal_type_label(raw.get("structure")),
             raw["dish"],
-            parse_print_number(raw["quantity"]),
+            parse_print_number(selected_a4_quantity(raw, columns, quantity_mode)),
             parse_print_number(raw.get("committed_norm")),
             clean_ingredient_name(raw["ingredient"]),
             parse_print_number(raw["norm"]),
@@ -939,8 +989,8 @@ def configure_a4_print(ws, last_row):
     ws.page_margins.footer = 0.1
 
 
-def process_sheet_format1_a4(ws_source):
-    rows = collect_a4_records(ws_source)
+def process_sheet_format1_a4(ws_source, quantity_mode=None):
+    rows = collect_a4_records(ws_source, quantity_mode)
     if not rows:
         raise ValueError("File nguồn không có dữ liệu để xuất Format 1.")
 

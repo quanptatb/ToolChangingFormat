@@ -20,7 +20,9 @@ from .common import (
     effective_cell_value,
     get_vietnamese_weekday,
     save_workbook,
-    normalize_comp
+    normalize_comp,
+    normalize_quantity_mode,
+    QUANTITY_MODE_FORECAST
 )
 from .rules import get_shopping_short_name, clean_site_name, get_rule_for_customer
 
@@ -266,7 +268,8 @@ def get_site_sort_key(site_name, cust=None):
             return (3, s)
     return (4, s)
 
-def map_columns(headers):
+def map_columns(headers, quantity_mode=None):
+    quantity_mode = normalize_quantity_mode(quantity_mode)
     col_map = {}
     for idx, col in enumerate(headers, start=1):
         if col is None:
@@ -293,11 +296,18 @@ def map_columns(headers):
         elif c_clean in ["món ăn", "mon an", "tên món", "ten mon"] and "cơ cấu" not in c_clean and "loại" not in c_clean and "loai" not in c_clean:
             col_map["mon"] = idx
         elif (
+            ("so luong" in c_no_accent or "s.luong" in c_no_accent)
+            and ("co nga duyet" in c_no_accent or "nga duyet" in c_no_accent)
+        ):
+            col_map["qty_approved"] = idx
+        elif ("so luong" in c_no_accent or "s.luong" in c_no_accent) and "du bao" in c_no_accent:
+            col_map["qty_forecast"] = idx
+        elif (
             c_clean in ["số lượng", "so luong", "s.lượng", "qty", "quantity"]
             or "so luong" in c_no_accent
             or "s.luong" in c_no_accent
         ) and "du bao" not in c_no_accent:
-            col_map["qty"] = idx
+            col_map.setdefault("qty", idx)
         elif c_clean in ["định mức", "dinh muc", "định lượng", "dinh luong"] and "cam kết" not in c_clean and "cam ket" not in c_clean:
             col_map["dinh_muc"] = idx
         elif c_clean in ["đvt", "đơn vị tính", "don vi tinh", "đơn vị", "don vi", "dvt"] and "mua hàng" not in c_clean and "mua hang" not in c_clean:
@@ -307,11 +317,24 @@ def map_columns(headers):
         elif any(x in c_clean for x in ["đơn vị tính mua hàng", "don vi tinh mua hang", "dvt mua", "dvt_mua"]):
             col_map["dvt_mua"] = idx
 
+    if quantity_mode == QUANTITY_MODE_FORECAST:
+        quantity_candidates = ("qty_forecast", "qty", "qty_approved")
+    else:
+        quantity_candidates = ("qty_approved", "qty", "qty_forecast")
+
+    for key in quantity_candidates:
+        if key in col_map:
+            col_map["qty"] = col_map[key]
+            break
+
     return col_map
 
-def parse_source_sheet(ws_source, file_path):
+def parse_source_sheet(ws_source, file_path, quantity_mode=None):
     headers = [ws_source.cell(1, c).value for c in range(1, ws_source.max_column + 1)]
-    col_map = map_columns(headers)
+    col_map = map_columns(headers, quantity_mode)
+    normalized_mode = normalize_quantity_mode(quantity_mode)
+    selected_qty_key = "qty_forecast" if normalized_mode == QUANTITY_MODE_FORECAST else "qty_approved"
+    selected_qty_column_present = selected_qty_key in col_map
 
     # Read rows
     raw_rows = []
@@ -322,7 +345,10 @@ def parse_source_sheet(ws_source, file_path):
 
     # Forward fill
     prev_vals = {}
-    fill_keys = ["ngay", "ma_kh", "bep", "ca", "co_cau", "loai_mon", "mon", "qty", "site_an"]
+    fill_keys = ["ngay", "ma_kh", "bep", "ca", "co_cau", "loai_mon", "mon", "site_an"]
+    qty_group_keys = ["ngay", "ma_kh", "bep", "ca", "co_cau", "loai_mon", "mon", "site_an"]
+    prev_qty_group = None
+    prev_qty_value = None
     parsed_rows = []
     for row in raw_rows:
         row_vals = list(row)
@@ -337,6 +363,23 @@ def parse_source_sheet(ws_source, file_path):
                 row_vals[idx - 1] = val
                 prev_vals[key] = val
 
+        qty_idx = col_map.get("qty")
+        if qty_idx is not None and (qty_idx - 1) < len(row_vals):
+            group_key = tuple(
+                str(row_vals[col_map[key] - 1]).strip()
+                for key in qty_group_keys
+                if col_map.get(key) is not None and (col_map[key] - 1) < len(row_vals)
+            )
+            qty_val = row_vals[qty_idx - 1]
+            if qty_val is None or str(qty_val).strip() == "":
+                if prev_qty_group == group_key:
+                    row_vals[qty_idx - 1] = prev_qty_value
+            else:
+                qty_val = str(qty_val).strip()
+                row_vals[qty_idx - 1] = qty_val
+                prev_qty_group = group_key
+                prev_qty_value = qty_val
+
         # Convert to dict
         row_dict = {}
         for key, col_idx in col_map.items():
@@ -344,6 +387,10 @@ def parse_source_sheet(ws_source, file_path):
                 row_dict[key] = row_vals[col_idx - 1]
             else:
                 row_dict[key] = ""
+        row_dict["_selected_qty_blank"] = (
+            selected_qty_column_present
+            and (row_dict.get("qty") is None or str(row_dict.get("qty")).strip() == "")
+        )
         parsed_rows.append(row_dict)
 
     return parsed_rows
@@ -376,7 +423,10 @@ def format_group_dishes(cust, r_list):
 
         for r in rows_mon:
             site = clean_site_name(r.get("site_an", ""), cust)
-            qty = to_numeric(r.get("qty")) or 0.0
+            qty_raw = r.get("qty")
+            qty_blank = qty_raw is None or str(qty_raw).strip() == ""
+            qty = to_numeric(qty_raw) or 0.0
+            selected_qty_blank = bool(r.get("_selected_qty_blank"))
 
             nvl = str(r.get("nvl") or "").strip()
             if nvl:
@@ -387,7 +437,7 @@ def format_group_dishes(cust, r_list):
                 has_kl_mua = kl_raw not in [None, ""]
                 kl_mua = kl_raw if has_kl_mua else None
 
-                if not qty:
+                if qty_blank and not selected_qty_blank:
                     qty = infer_qty_from_weight(kl_mua, dvt_mua, dm_val, dm_unit) or 0.0
 
                 nvl_dinh_muc[nvl] = (dm_val, dm_unit, dvt_mua)
@@ -2067,7 +2117,7 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
                 wb.remove(wb[name])
     return wb
 
-def process_sheet_format2(ws_source, file_path, date_mode="auto", selected_kitchen=None):
+def process_sheet_format2(ws_source, file_path, date_mode="auto", selected_kitchen=None, quantity_mode=None):
     # Try to find all Excel files in Excel/ folder
     excel_dir = file_path.parent
     if excel_dir.name != "Excel":
@@ -2089,12 +2139,12 @@ def process_sheet_format2(ws_source, file_path, date_mode="auto", selected_kitch
             try:
                 wb_temp = openpyxl.load_workbook(p, data_only=True)
                 ws_temp = wb_temp.active
-                parsed = parse_source_sheet(ws_temp, p)
+                parsed = parse_source_sheet(ws_temp, p, quantity_mode)
                 all_parsed_rows.extend(parsed)
             except Exception as e:
                 print(f"Lỗi khi đọc file {p.name}: {e}")
     else:
-        parsed = parse_source_sheet(ws_source, file_path)
+        parsed = parse_source_sheet(ws_source, file_path, quantity_mode)
         all_parsed_rows.extend(parsed)
 
     return populate_template_workbook_fill_only(all_parsed_rows, selected_kitchen)

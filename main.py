@@ -29,6 +29,8 @@ from components.common import (
     input_dir,
     output_dir,
     APPROVAL_FORMAT_MODE,
+    QUANTITY_MODE_DEFAULT,
+    normalize_quantity_mode,
 )
 from components.format_bizen_po import BIZEN_IDENTIFIER, BIZEN_FORMAT_MODE, can_process_bizen_po
 from components.format_bizen_po_export import BIZEN_EXPORT_IDENTIFIER, BIZEN_EXPORT_FORMAT_MODE, can_process_bizen_po_export
@@ -51,7 +53,14 @@ def _detect_bizen_export_file(filename):
     return BIZEN_EXPORT_IDENTIFIER in (filename or "")
 
 
-def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="format1", selected_kitchen=None):
+def format_workbook_bytes(
+    file_bytes,
+    filename,
+    date_mode="auto",
+    format_mode="format1",
+    selected_kitchen=None,
+    quantity_mode=QUANTITY_MODE_DEFAULT,
+):
     if not file_bytes:
         raise ValueError("File Excel đang trống.")
 
@@ -85,16 +94,24 @@ def format_workbook_bytes(file_bytes, filename, date_mode="auto", format_mode="f
         elif can_process_bizen_po(worksheet):
             format_mode = BIZEN_FORMAT_MODE
 
+    quantity_mode = normalize_quantity_mode(quantity_mode)
+
     if format_mode == BIZEN_EXPORT_FORMAT_MODE:
         workbook = process_sheet_bizen_po_export(worksheet)
     elif format_mode == BIZEN_FORMAT_MODE:
         workbook = process_sheet_bizen_po(worksheet)
     elif format_mode == "format2":
-        workbook = process_sheet_format2(worksheet, Path(safe_name), date_mode, selected_kitchen)
+        workbook = process_sheet_format2(
+            worksheet,
+            Path(safe_name),
+            date_mode,
+            selected_kitchen,
+            quantity_mode,
+        )
     elif format_mode == APPROVAL_FORMAT_MODE:
         workbook = process_sheet_approval(worksheet)
     else:
-        workbook = process_sheet_format1_a4(worksheet)
+        workbook = process_sheet_format1_a4(worksheet, quantity_mode)
 
     output = BytesIO()
     ensure_visible_worksheet(workbook)
@@ -416,6 +433,13 @@ index_html = """<!doctype html>
               <option value="bizen_po_export">BIZEN PO Xuất (Có mẫu)</option>
             </select>
           </div>
+          <div class="control-group" id="quantityGroup">
+            <label for="quantity_mode">Số lượng để in</label>
+            <select id="quantity_mode" name="quantity_mode">
+              <option value="approved" selected>Số lượng cô Nga duyệt</option>
+              <option value="forecast">Số lượng dự báo</option>
+            </select>
+          </div>
         </div>
         <div class="actions">
           <div class="status" id="status">Chưa chọn file</div>
@@ -436,6 +460,13 @@ index_html = """<!doctype html>
     const status = document.getElementById('status');
     const submit = document.getElementById('submit');
     const form = document.querySelector('form');
+    const formatMode = document.getElementById('format_mode');
+    const quantityGroup = document.getElementById('quantityGroup');
+
+    function updateQuantityVisibility() {
+      const usesQuantityMode = ['format1', 'format2'].includes(formatMode.value);
+      quantityGroup.hidden = !usesQuantityMode;
+    }
 
     function updateFileName() {
       const selected = file.files && file.files[0];
@@ -446,6 +477,7 @@ index_html = """<!doctype html>
     }
 
     file.addEventListener('change', updateFileName);
+    formatMode.addEventListener('change', updateQuantityVisibility);
     drop.addEventListener('dragover', event => {
       event.preventDefault();
       drop.classList.add('is-dragover');
@@ -467,6 +499,7 @@ index_html = """<!doctype html>
         status.textContent = file.files[0] ? 'Có thể xuất lại file' : 'Chưa chọn file';
       }, 1800);
     });
+    updateQuantityVisibility();
   </script>
 </body>
 </html>
@@ -562,6 +595,7 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
                 raise ValueError("Vui lòng chọn file Excel trước khi xuất.")
 
             format_opt = fields.get("format_mode", "format1")
+            quantity_opt = fields.get("quantity_mode", QUANTITY_MODE_DEFAULT)
 
             # ---------------- DIAGNOSTIC LOGGING ----------------
             try:
@@ -579,6 +613,7 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
                     f.write(f"\n--- {datetime.datetime.now()} ---\n")
                     f.write(f"Uploaded file: {filename}\n")
                     f.write(f"Format mode selected: {format_opt}\n")
+                    f.write(f"Quantity mode selected: {quantity_opt}\n")
                     f.write(f"Headers row 1: {headers_test}\n")
             except Exception as e:
                 with open("diagnostic_log.txt", "a", encoding="utf-8") as f:
@@ -586,7 +621,11 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
             # ----------------------------------------------------
 
             output_bytes = format_workbook_bytes(
-                file_bytes, filename, date_mode="auto", format_mode=format_opt
+                file_bytes,
+                filename,
+                date_mode="auto",
+                format_mode=format_opt,
+                quantity_mode=quantity_opt,
             )
             download_name = output_filename_for_format(filename, format_opt)
             content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
