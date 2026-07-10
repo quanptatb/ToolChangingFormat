@@ -285,7 +285,7 @@ def process_sheet_bizen_po_export(ws):
         _copy_sheet_basics(tpl_pot_ws, po_ws, copy_rows_count=8)
         
         # Apply header formatting to detailed PO sheet headers (Row 8)
-        for c in range(1, 11):
+        for c in range(1, 9):
             cell = po_ws.cell(row=8, column=c)
             cell.fill = header_fill
             cell.font = header_font
@@ -324,9 +324,9 @@ def process_sheet_bizen_po_export(ws):
         cell_ncc.alignment = Alignment(horizontal="left", vertical="center")
         
         # Merge value cells for metadata
-        po_ws.merge_cells("E4:J4")
-        po_ws.merge_cells("E5:J5")
-        po_ws.merge_cells("E6:J6")
+        po_ws.merge_cells("E4:H4")
+        po_ws.merge_cells("E5:H5")
+        po_ws.merge_cells("E6:H6")
         
         # Write PO detail items
         start_row = 9
@@ -348,8 +348,6 @@ def process_sheet_bizen_po_export(ws):
                 r_data["don_vi"],
                 price,
                 f"=C{r_idx}*E{r_idx}",  # Thành tiền formula
-                r_data["khach_hang"],
-                r_data["ca_an"],
                 r_data["noi_giao"],
                 r_data["gio_giao"]
             ]
@@ -379,7 +377,7 @@ def process_sheet_bizen_po_export(ws):
                 cell.fill = current_fill
                 
                 # Column alignments and formatting
-                if col_idx in {1, 4, 7, 8, 9, 10}:
+                if col_idx in {1, 4, 7, 8}:
                     cell.alignment = align_center
                 elif col_idx == 2:
                     cell.alignment = align_left
@@ -408,17 +406,17 @@ def process_sheet_bizen_po_export(ws):
         
         # Helper to write total rows with styling
         def write_po_total_row(ws, r_idx, label, val_or_form, is_pct=False):
-            ws.merge_cells(start_row=r_idx, start_column=1, end_row=r_idx, end_column=9)
+            ws.merge_cells(start_row=r_idx, start_column=1, end_row=r_idx, end_column=5)
             cell_lbl = ws.cell(row=r_idx, column=1, value=label)
             cell_lbl.font = Font(name="Calibri", size=11, bold=True)
             cell_lbl.alignment = align_center
             
-            for c in range(1, 10):
+            for c in range(1, 6):
                 c_cell = ws.cell(row=r_idx, column=c)
                 c_cell.border = thin_border
                 c_cell.fill = total_fill
                 
-            cell_val = ws.cell(row=r_idx, column=10, value=val_or_form)
+            cell_val = ws.cell(row=r_idx, column=6, value=val_or_form)
             cell_val.font = Font(name="Calibri", size=11, bold=True)
             cell_val.alignment = align_right
             cell_val.border = thin_border
@@ -431,13 +429,13 @@ def process_sheet_bizen_po_export(ws):
         # Write PO totals at the bottom of the table
         write_po_total_row(po_ws, N + 1, "Tổng tiền", f"=SUM(F9:F{N})")
         write_po_total_row(po_ws, N + 2, "Thuế suất thuế GTGT", po_vat_rate, is_pct=True)
-        write_po_total_row(po_ws, N + 3, "Tiền thuế GTGT", f"=J{N+1}*J{N+2}")
-        write_po_total_row(po_ws, N + 4, "Tổng tiền thanh toán", f"=J{N+1}+J{N+3}")
+        write_po_total_row(po_ws, N + 3, "Tiền thuế GTGT", f"=F{N+1}*F{N+2}")
+        write_po_total_row(po_ws, N + 4, "Tổng tiền thanh toán", f"=F{N+1}+F{N+3}")
         
-        # Add Excel Table (Ctrl+T) for detailed sheet table (A8:J{N})
+        # Add Excel Table (Ctrl+T) for detailed sheet table (A8:H{N})
         from openpyxl.worksheet.table import Table, TableStyleInfo
         table_name = f"POTable_{idx}"
-        tab = Table(displayName=table_name, ref=f"A8:J{N}")
+        tab = Table(displayName=table_name, ref=f"A8:H{N}")
         style = TableStyleInfo(
             name="TableStyleMedium2", 
             showFirstColumn=False,
@@ -449,7 +447,7 @@ def process_sheet_bizen_po_export(ws):
         po_ws.add_table(tab)
         
         # Auto-fit column widths
-        for col_idx in range(1, 11):
+        for col_idx in range(1, 9):
             max_len = 0
             for row_idx in range(1, N + 1):
                 cell_val = po_ws.cell(row=row_idx, column=col_idx).value
@@ -613,7 +611,7 @@ def process_sheet_bizen_po_export(ws):
                 pass
                 
         # Format headers at Row 6
-        for c in range(1, 14):
+        for c in range(1, 12):
             cell = sum_order_ws.cell(row=6, column=c)
             cell.fill = header_fill
             cell.font = header_font
@@ -634,8 +632,6 @@ def process_sheet_bizen_po_export(ws):
                 item_data["don_vi"],
                 item_data["don_gia"],
                 f"=F{r_idx}*H{r_idx}",  # Thành tiền formula (F is qty, H is price)
-                item_data["khach_hang"],
-                item_data["ca_an"],
                 item_data["noi_giao"],
                 item_data["gio_giao"]
             ]
@@ -649,7 +645,7 @@ def process_sheet_bizen_po_export(ws):
                 cell.fill = current_fill
                 
                 # Alignments and formats
-                if col_idx in {1, 2, 3, 7, 10, 11, 12, 13}:
+                if col_idx in {1, 2, 3, 7, 10, 11}:
                     cell.alignment = align_center
                 elif col_idx in {4, 5}:
                     cell.alignment = align_left
@@ -670,17 +666,17 @@ def process_sheet_bizen_po_export(ws):
         
         # Helper to write total rows with styling
         def write_combined_total_row(ws, r_idx, label, val_or_form, is_pct=False):
-            ws.merge_cells(start_row=r_idx, start_column=1, end_row=r_idx, end_column=9)
+            ws.merge_cells(start_row=r_idx, start_column=1, end_row=r_idx, end_column=8)
             cell_lbl = ws.cell(row=r_idx, column=1, value=label)
             cell_lbl.font = Font(name="Calibri", size=11, bold=True)
             cell_lbl.alignment = align_center
             
-            for c in range(1, 10):
+            for c in range(1, 9):
                 c_cell = ws.cell(row=r_idx, column=c)
                 c_cell.border = thin_border
                 c_cell.fill = total_fill
                 
-            cell_val = ws.cell(row=r_idx, column=10, value=val_or_form)
+            cell_val = ws.cell(row=r_idx, column=9, value=val_or_form)
             cell_val.font = Font(name="Calibri", size=11, bold=True)
             cell_val.alignment = align_right
             cell_val.border = thin_border
@@ -692,13 +688,13 @@ def process_sheet_bizen_po_export(ws):
 
         write_combined_total_row(sum_order_ws, N_comb + 1, "Tổng tiền", f"=SUM(I7:I{N_comb})")
         write_combined_total_row(sum_order_ws, N_comb + 2, "Thuế suất thuế GTGT", combined_vat_rate, is_pct=True)
-        write_combined_total_row(sum_order_ws, N_comb + 3, "Tiền thuế GTGT", f"=J{N_comb+1}*J{N_comb+2}")
-        write_combined_total_row(sum_order_ws, N_comb + 4, "Tổng tiền thanh toán", f"=J{N_comb+1}+J{N_comb+3}")
+        write_combined_total_row(sum_order_ws, N_comb + 3, "Tiền thuế GTGT", f"=I{N_comb+1}*I{N_comb+2}")
+        write_combined_total_row(sum_order_ws, N_comb + 4, "Tổng tiền thanh toán", f"=I{N_comb+1}+I{N_comb+3}")
         
-        # Add Excel Table (Ctrl+T) for combined sheet table (A6:M{N_comb})
+        # Add Excel Table (Ctrl+T) for combined sheet table (A6:K{N_comb})
         from openpyxl.worksheet.table import Table, TableStyleInfo
         table_name = "CombinedOrderTable"
-        tab = Table(displayName=table_name, ref=f"A6:M{N_comb}")
+        tab = Table(displayName=table_name, ref=f"A6:K{N_comb}")
         style = TableStyleInfo(
             name="TableStyleMedium2", 
             showFirstColumn=False,
@@ -713,7 +709,7 @@ def process_sheet_bizen_po_export(ws):
         sum_order_ws.freeze_panes = "A7"
         
         # Auto-fit columns of combined sheet
-        for col_idx in range(1, 14):
+        for col_idx in range(1, 12):
             max_len = 0
             for row_idx in range(1, N_comb + 1):
                 cell_val = sum_order_ws.cell(row=row_idx, column=col_idx).value
@@ -725,7 +721,7 @@ def process_sheet_bizen_po_export(ws):
                     if display_len > max_len:
                         max_len = display_len
             adjusted_width = max_len + 4
-            if col_idx in [4, 5, 12]:
+            if col_idx in [4, 5, 10]:
                 adjusted_width = max(20, min(adjusted_width, 60))
             else:
                 adjusted_width = max(10, min(adjusted_width, 40))
