@@ -505,7 +505,7 @@ def process_sheet_bizen_po_export(ws):
         cell_ncc.fill = current_fill
         
         # Col D: Thành tiền
-        cell_amt = summary_ws.cell(row=r_idx, column=4, value=f"='{s_name}'!J{info['total_row']}")
+        cell_amt = summary_ws.cell(row=r_idx, column=4, value=f"='{s_name}'!F{info['total_row']}")
         cell_amt.font = Font(name="Calibri", size=11)
         cell_amt.alignment = align_right
         cell_amt.border = thin_border
@@ -513,7 +513,7 @@ def process_sheet_bizen_po_export(ws):
         cell_amt.number_format = number_format_thousands
         
         # Col E: Thuế VAT
-        cell_vat = summary_ws.cell(row=r_idx, column=5, value=f"='{s_name}'!J{info['vat_row']}")
+        cell_vat = summary_ws.cell(row=r_idx, column=5, value=f"='{s_name}'!F{info['vat_row']}")
         cell_vat.font = Font(name="Calibri", size=11)
         cell_vat.alignment = align_right
         cell_vat.border = thin_border
@@ -521,7 +521,7 @@ def process_sheet_bizen_po_export(ws):
         cell_vat.number_format = number_format_thousands
         
         # Col F: Thành tiền sau thuế 
-        cell_net = summary_ws.cell(row=r_idx, column=6, value=f"='{s_name}'!J{info['grand_total_row']}")
+        cell_net = summary_ws.cell(row=r_idx, column=6, value=f"='{s_name}'!F{info['grand_total_row']}")
         cell_net.font = Font(name="Calibri", size=11)
         cell_net.alignment = align_right
         cell_net.border = thin_border
