@@ -115,9 +115,9 @@ def _detect_source_columns(ws):
         "don_gia": header_map.get("Tổng Đơn giá") or header_map.get("Sum: Đơn giá"),
         "thanh_tien": header_map.get("Tổng thành tiền") or header_map.get("Sum: Thành tiền"),
         "khach_hang": header_map.get("Khách hàng"),
-        "ca_an": header_map.get("Ca"),
-        "noi_giao": header_map.get("Nơi giao hàng (Khách hàng)"),
-        "gio_giao": header_map.get("Giờ giao hàng"),
+        "ca_an": header_map.get("Ca") or header_map.get("Ca ăn"),
+        "noi_giao": header_map.get("Nơi giao hàng (Khách hàng)") or header_map.get("Nơi giao"),
+        "gio_giao": header_map.get("Giờ giao hàng") or header_map.get("Giờ giao"),
         "thue_vat": header_map.get("Sum: Thuế VAT") or header_map.get("Thuế VAT") or header_map.get("Tổng Thuế VAT"),
         "thanh_tien_sau_thue": header_map.get("Sum: Thành tiền sau thuế") or header_map.get("Thành tiền sau thuế") or header_map.get("Tổng tiền Sau thuế"),
     }
@@ -446,9 +446,8 @@ def process_sheet_bizen_po_export(ws):
                 adjusted_width = max(10, min(adjusted_width, 40))
             po_ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
             
-        # Freeze panes & Auto-filter on detailed table
+        # Freeze panes (Auto-filter is already enabled by the Excel Table)
         po_ws.freeze_panes = "A9"
-        po_ws.auto_filter.ref = f"A8:J{N}"
         
         summary_rows_info.append({
             "sheet_name": sheet_name,
