@@ -193,3 +193,31 @@ Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR
 Uploaded file: BIZEN - CATERING_Lệnh sản xuất (SO - PR)_IN (đầy đủ) (1).xlsx
 Format mode selected: format2
 Headers row 1: ['Mã lệnh sản xuất', 'Mã thực đơn', 'Mã SO', 'Mã PR', 'Thứ', 'Ngày', 'Ca', 'Khách hàng', 'Bếp', 'Site ăn', 'Cơ cấu suất ăn', 'Loại món ăn', 'Nguyên vật liệu', 'Nguyên vật liệu đầy đủ', 'Định mức cam kết', 'Món ăn', 'Số lượng cô Nga duyệt', 'Định mức', 'Đơn vị tính']
+
+--- 2026-07-10 13:25:04.521318 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table (6) - da dinh dang.xlsx
+Format mode selected: bizen_po_export
+Headers row 1: []
+
+--- 2026-07-10 13:25:19.558611 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table (6).xlsx
+Format mode selected: bizen_po_export
+Headers row 1: ['No.', 'Ngày', 'Mã PO', 'Nhà cung cấp', 'Mã nguyên vật liệu', 'Tên nguyên vật liệu', 'Đơn vị tính', 'Sum: Khối lượng đặt hàng', 'Sum: Đơn giá', 'Sum: Thành tiền', 'Sum: Thuế VAT', 'Sum: Thành tiền sau thuế', 'SourceID', 'Nơi giao', 'Giờ giao', 'Mã POT']
+
+--- 2026-07-10 13:44:58.968381 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table (6).xlsx
+Format mode selected: bizen_po_export
+Quantity mode selected: approved
+Headers row 1: ['No.', 'Ngày', 'Mã PO', 'Nhà cung cấp', 'Mã nguyên vật liệu', 'Tên nguyên vật liệu', 'Đơn vị tính', 'Sum: Khối lượng đặt hàng', 'Sum: Đơn giá', 'Sum: Thành tiền', 'Sum: Thuế VAT', 'Sum: Thành tiền sau thuế', 'SourceID', 'Nơi giao', 'Giờ giao', 'Mã POT']
+
+--- 2026-07-10 13:49:56.194779 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table (6).xlsx
+Format mode selected: bizen_po_export
+Quantity mode selected: approved
+Headers row 1: ['No.', 'Ngày', 'Mã PO', 'Nhà cung cấp', 'Mã nguyên vật liệu', 'Tên nguyên vật liệu', 'Đơn vị tính', 'Sum: Khối lượng đặt hàng', 'Sum: Đơn giá', 'Sum: Thành tiền', 'Sum: Thuế VAT', 'Sum: Thành tiền sau thuế', 'SourceID', 'Nơi giao', 'Giờ giao', 'Mã POT']
+
+--- 2026-07-10 13:57:26.988726 ---
+Uploaded file: BIZEN - CATERING_Xuất PO ra ex_Pivot table (6).xlsx
+Format mode selected: bizen_po_export
+Quantity mode selected: approved
+Headers row 1: ['No.', 'Ngày', 'Mã PO', 'Nhà cung cấp', 'Mã nguyên vật liệu', 'Tên nguyên vật liệu', 'Đơn vị tính', 'Sum: Khối lượng đặt hàng', 'Sum: Đơn giá', 'Sum: Thành tiền', 'Sum: Thuế VAT', 'Sum: Thành tiền sau thuế', 'SourceID', 'Nơi giao', 'Giờ giao', 'Mã POT']
