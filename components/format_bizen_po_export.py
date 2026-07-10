@@ -120,6 +120,7 @@ def _detect_source_columns(ws):
         "gio_giao": header_map.get("Giờ giao hàng") or header_map.get("Giờ giao"),
         "thue_vat": header_map.get("Sum: Thuế VAT") or header_map.get("Thuế VAT") or header_map.get("Tổng Thuế VAT"),
         "thanh_tien_sau_thue": header_map.get("Sum: Thành tiền sau thuế") or header_map.get("Thành tiền sau thuế") or header_map.get("Tổng tiền Sau thuế"),
+        "ma_pot": header_map.get("Mã POT") or header_map.get("POT") or header_map.get("Mã PO Temp"),
     }
     
     required = ["ma_po", "ma_hang", "dien_giai", "don_vi", "khoi_luong", "don_gia", "thanh_tien"]
@@ -152,6 +153,7 @@ def process_sheet_bizen_po_export(ws):
         ca_an = effective_cell_value(ws, lookup, r, col_map["ca_an"])
         noi_giao = effective_cell_value(ws, lookup, r, col_map["noi_giao"])
         gio_giao = effective_cell_value(ws, lookup, r, col_map["gio_giao"])
+        ma_pot = effective_cell_value(ws, lookup, r, col_map["ma_pot"]) if col_map.get("ma_pot") else None
         
         # Đọc Thuế VAT và Thành tiền sau thuế
         thue_vat_raw = effective_cell_value(ws, lookup, r, col_map["thue_vat"]) if col_map.get("thue_vat") else 0
@@ -178,7 +180,8 @@ def process_sheet_bizen_po_export(ws):
             "noi_giao": noi_giao,
             "gio_giao": gio_giao,
             "thue_vat": thue_vat,
-            "thanh_tien_sau_thue": thanh_tien_sau_thue
+            "thanh_tien_sau_thue": thanh_tien_sau_thue,
+            "ma_pot": ma_pot
         })
         
     if not grouped_data:
@@ -269,6 +272,8 @@ def process_sheet_bizen_po_export(ws):
         
     # 2. Process each PO into separate sheets
     summary_rows_info = []
+    all_order_items = []
+    all_rates_list = []
     unique_pos = sorted(grouped_data.keys())
     
     for idx, ma_po in enumerate(unique_pos, start=1):
@@ -349,6 +354,21 @@ def process_sheet_bizen_po_export(ws):
                 r_data["gio_giao"]
             ]
             
+            all_order_items.append({
+                "ma_po": ma_po,
+                "ma_hang": r_data["ma_hang"],
+                "ma_pot": r_data["ma_pot"],
+                "nha_cung_cap": r_data["nha_cung_cap"],
+                "dien_giai": r_data["dien_giai"],
+                "khoi_luong": qty,
+                "don_vi": r_data["don_vi"],
+                "don_gia": price,
+                "khach_hang": r_data["khach_hang"],
+                "ca_an": r_data["ca_an"],
+                "noi_giao": r_data["noi_giao"],
+                "gio_giao": r_data["gio_giao"]
+            })
+            
             # Alternating background fill for rows
             current_fill = row_fill_light if i % 2 == 1 else row_fill_white
             
@@ -384,6 +404,7 @@ def process_sheet_bizen_po_export(ws):
                 rates.append((net - before) / before)
         po_vat_rate = max(rates) if rates else 0.0
         po_vat_rate = round(po_vat_rate, 2)
+        all_rates_list.extend(rates)
         
         # Helper to write total rows with styling
         def write_po_total_row(ws, r_idx, label, val_or_form, is_pct=False):
@@ -570,5 +591,145 @@ def process_sheet_bizen_po_export(ws):
         adjusted_width = max(12, min(adjusted_width, 40))
         summary_ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
         
+    # 4. Populate combined order items sheet "Tổng hợp đơn Hàng"
+    if "Tổng hợp đơn Hàng" in tpl_wb.sheetnames:
+        sum_order_ws = out_wb.create_sheet(title="Tổng hợp đơn Hàng", index=1)
+        sum_order_ws.views.sheetView[0].showGridLines = True
+        tpl_sum_order_ws = tpl_wb['Tổng hợp đơn Hàng']
+        
+        # Copy header and layout basics (row 1-6)
+        _copy_sheet_basics(tpl_sum_order_ws, sum_order_ws, copy_rows_count=6)
+        
+        # Write Date at E4 (merged E4:J4)
+        if isinstance(ngay_val, datetime.datetime) or ngay_val:
+            cell_ngay = sum_order_ws.cell(row=4, column=5, value=ngay_val)
+            cell_ngay.font = Font(name="Calibri", size=12, bold=True)
+            cell_ngay.alignment = Alignment(horizontal="left", vertical="center")
+            if isinstance(ngay_val, datetime.datetime):
+                cell_ngay.number_format = 'DD/MM/YYYY'
+            try:
+                sum_order_ws.merge_cells("E4:J4")
+            except Exception:
+                pass
+                
+        # Format headers at Row 6
+        for c in range(1, 14):
+            cell = sum_order_ws.cell(row=6, column=c)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = align_center
+            cell.border = thin_border
+            
+        start_row = 7
+        for i, item_data in enumerate(all_order_items):
+            r_idx = start_row + i
+            
+            values = [
+                item_data["ma_po"],
+                item_data["ma_hang"],
+                item_data["ma_pot"],
+                item_data["nha_cung_cap"],
+                item_data["dien_giai"],
+                item_data["khoi_luong"],
+                item_data["don_vi"],
+                item_data["don_gia"],
+                f"=F{r_idx}*H{r_idx}",  # Thành tiền formula (F is qty, H is price)
+                item_data["khach_hang"],
+                item_data["ca_an"],
+                item_data["noi_giao"],
+                item_data["gio_giao"]
+            ]
+            
+            current_fill = row_fill_light if i % 2 == 1 else row_fill_white
+            
+            for col_idx, val in enumerate(values, start=1):
+                cell = sum_order_ws.cell(row=r_idx, column=col_idx, value=val)
+                cell.font = Font(name="Calibri", size=11)
+                cell.border = thin_border
+                cell.fill = current_fill
+                
+                # Alignments and formats
+                if col_idx in {1, 2, 3, 7, 10, 11, 12, 13}:
+                    cell.alignment = align_center
+                elif col_idx in {4, 5}:
+                    cell.alignment = align_left
+                elif col_idx in {6, 8, 9}:
+                    cell.alignment = align_right
+                    if col_idx == 6:
+                        qty_val = item_data["khoi_luong"]
+                        if isinstance(qty_val, float) and not qty_val.is_integer():
+                            cell.number_format = number_format_decimal
+                        else:
+                            cell.number_format = number_format_thousands
+                    elif col_idx in {8, 9}:
+                        cell.number_format = number_format_thousands
+                        
+        N_comb = 6 + len(all_order_items)
+        combined_vat_rate = max(all_rates_list) if all_rates_list else 0.0
+        combined_vat_rate = round(combined_vat_rate, 2)
+        
+        # Helper to write total rows with styling
+        def write_combined_total_row(ws, r_idx, label, val_or_form, is_pct=False):
+            ws.merge_cells(start_row=r_idx, start_column=1, end_row=r_idx, end_column=9)
+            cell_lbl = ws.cell(row=r_idx, column=1, value=label)
+            cell_lbl.font = Font(name="Calibri", size=11, bold=True)
+            cell_lbl.alignment = align_center
+            
+            for c in range(1, 10):
+                c_cell = ws.cell(row=r_idx, column=c)
+                c_cell.border = thin_border
+                c_cell.fill = total_fill
+                
+            cell_val = ws.cell(row=r_idx, column=10, value=val_or_form)
+            cell_val.font = Font(name="Calibri", size=11, bold=True)
+            cell_val.alignment = align_right
+            cell_val.border = thin_border
+            cell_val.fill = total_fill
+            if is_pct:
+                cell_val.number_format = '0%'
+            else:
+                cell_val.number_format = number_format_thousands
+
+        write_combined_total_row(sum_order_ws, N_comb + 1, "Tổng tiền", f"=SUM(I7:I{N_comb})")
+        write_combined_total_row(sum_order_ws, N_comb + 2, "Thuế suất thuế GTGT", combined_vat_rate, is_pct=True)
+        write_combined_total_row(sum_order_ws, N_comb + 3, "Tiền thuế GTGT", f"=J{N_comb+1}*J{N_comb+2}")
+        write_combined_total_row(sum_order_ws, N_comb + 4, "Tổng tiền thanh toán", f"=J{N_comb+1}+J{N_comb+3}")
+        
+        # Add Excel Table (Ctrl+T) for combined sheet table (A6:M{N_comb})
+        from openpyxl.worksheet.table import Table, TableStyleInfo
+        table_name = "CombinedOrderTable"
+        tab = Table(displayName=table_name, ref=f"A6:M{N_comb}")
+        style = TableStyleInfo(
+            name="TableStyleMedium2", 
+            showFirstColumn=False,
+            showLastColumn=False, 
+            showRowStripes=True, 
+            showColumnStripes=False
+        )
+        tab.tableStyleInfo = style
+        sum_order_ws.add_table(tab)
+        
+        # Freeze panes (Auto-filter is already enabled by the Excel Table)
+        sum_order_ws.freeze_panes = "A7"
+        
+        # Auto-fit columns of combined sheet
+        for col_idx in range(1, 14):
+            max_len = 0
+            for row_idx in range(1, N_comb + 1):
+                cell_val = sum_order_ws.cell(row=row_idx, column=col_idx).value
+                if cell_val is not None:
+                    if isinstance(cell_val, (int, float)):
+                        display_len = len("{:,.0f}".format(cell_val))
+                    else:
+                        display_len = len(str(cell_val))
+                    if display_len > max_len:
+                        max_len = display_len
+            adjusted_width = max_len + 4
+            if col_idx in [4, 5, 12]:
+                adjusted_width = max(20, min(adjusted_width, 60))
+            else:
+                adjusted_width = max(10, min(adjusted_width, 40))
+            sum_order_ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
+
     tpl_wb.close()
     return out_wb

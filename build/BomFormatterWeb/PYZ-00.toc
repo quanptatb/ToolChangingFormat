@@ -87,6 +87,34 @@
    'D:\\Documents\\tool chuyển '
    'đổi\\ToolChangingFormat\\components\\format_bizen_po_export.py',
    'PYMODULE'),
+  ('components.rules',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\__init__.py',
+   'PYMODULE'),
+  ('components.rules.base',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\base.py',
+   'PYMODULE'),
+  ('components.rules.default',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\default.py',
+   'PYMODULE'),
+  ('components.rules.lixil',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\lixil.py',
+   'PYMODULE'),
+  ('components.rules.om',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\om.py',
+   'PYMODULE'),
+  ('components.rules.scavi',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\scavi.py',
+   'PYMODULE'),
+  ('components.rules.zamil',
+   'D:\\Documents\\tool chuyển '
+   'đổi\\ToolChangingFormat\\components\\rules\\zamil.py',
+   'PYMODULE'),
   ('compression',
    'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\compression\\__init__.py',
    'PYMODULE'),

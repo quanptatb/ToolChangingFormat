@@ -72,11 +72,7 @@
  [],
  False,
  False,
-<<<<<<< HEAD
- 1782882758,
-=======
- 1783124275,
->>>>>>> 2fea40091387a91f2d9f329ad4ca69f5305085d6
+ 1783665666,
  [('run.exe',
    'D:\\Documents\\tool chuyển '
    'đổi\\ToolChangingFormat\\.build-venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',

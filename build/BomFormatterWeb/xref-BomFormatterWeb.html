@@ -1728,6 +1728,7 @@ imports:
 imported by:
     <a href="#_pydecimal">_pydecimal</a>
  &#8226;   <a href="#ast">ast</a>
+ &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
  &#8226;   <a href="#contextlib">contextlib</a>
  &#8226;   <a href="#difflib">difflib</a>
@@ -1783,6 +1784,7 @@ imported by:
  &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
+ &#8226;   <a href="#components.rules">components.rules</a>
  &#8226;   <a href="#main.py">main.py</a>
 
   </div>
@@ -1822,6 +1824,7 @@ imports:
  &#8226;   <a href="#copy">copy</a>
  &#8226;   <a href="#csv">csv</a>
  &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#openpyxl">openpyxl</a>
  &#8226;   <a href="#openpyxl.styles">openpyxl.styles</a>
  &#8226;   <a href="#openpyxl.utils">openpyxl.utils</a>
  &#8226;   <a href="#pathlib">pathlib</a>
@@ -1837,6 +1840,7 @@ imported by:
  &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
+ &#8226;   <a href="#components.rules.default">components.rules.default</a>
  &#8226;   <a href="#main.py">main.py</a>
 
   </div>
@@ -1873,14 +1877,18 @@ imported by:
   <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/format2_shopping.py" type="text/plain"><tt>components.format2_shopping</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#components">components</a>
+    <a href="#collections">collections</a>
+ &#8226;   <a href="#components">components</a>
  &#8226;   <a href="#components.common">components.common</a>
- &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#copy">copy</a>
  &#8226;   <a href="#openpyxl">openpyxl</a>
+ &#8226;   <a href="#openpyxl.cell.cell">openpyxl.cell.cell</a>
  &#8226;   <a href="#openpyxl.styles">openpyxl.styles</a>
- &#8226;   <a href="#openpyxl.worksheet.pagebreak">openpyxl.worksheet.pagebreak</a>
- &#8226;   <a href="#openpyxl.worksheet.properties">openpyxl.worksheet.properties</a>
+ &#8226;   <a href="#openpyxl.utils">openpyxl.utils</a>
+ &#8226;   <a href="#openpyxl.worksheet.cell_range">openpyxl.worksheet.cell_range</a>
  &#8226;   <a href="#pathlib">pathlib</a>
+ &#8226;   <a href="#re">re</a>
 
   </div>
   <div class="import">
@@ -1936,6 +1944,139 @@ imports:
 imported by:
     <a href="#components">components</a>
  &#8226;   <a href="#main.py">main.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/__init__.py" type="text/plain"><tt>components.rules</tt></a>
+<span class="moduletype">Package</span>  <div class="import">
+imports:
+    <a href="#components">components</a>
+ &#8226;   <a href="#components.rules.default">components.rules.default</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.format2_shopping">components.format2_shopping</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+ &#8226;   <a href="#components.rules.default">components.rules.default</a>
+ &#8226;   <a href="#components.rules.lixil">components.rules.lixil</a>
+ &#8226;   <a href="#components.rules.om">components.rules.om</a>
+ &#8226;   <a href="#components.rules.scavi">components.rules.scavi</a>
+ &#8226;   <a href="#components.rules.zamil">components.rules.zamil</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.base"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/base.py" type="text/plain"><tt>components.rules.base</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.rules">components.rules</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules.default">components.rules.default</a>
+ &#8226;   <a href="#components.rules.lixil">components.rules.lixil</a>
+ &#8226;   <a href="#components.rules.om">components.rules.om</a>
+ &#8226;   <a href="#components.rules.scavi">components.rules.scavi</a>
+ &#8226;   <a href="#components.rules.zamil">components.rules.zamil</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.default"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/default.py" type="text/plain"><tt>components.rules.default</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.common">components.common</a>
+ &#8226;   <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+ &#8226;   <a href="#components.rules.lixil">components.rules.lixil</a>
+ &#8226;   <a href="#components.rules.om">components.rules.om</a>
+ &#8226;   <a href="#components.rules.scavi">components.rules.scavi</a>
+ &#8226;   <a href="#components.rules.zamil">components.rules.zamil</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules">components.rules</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.lixil"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/lixil.py" type="text/plain"><tt>components.rules.lixil</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules.default">components.rules.default</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.om"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/om.py" type="text/plain"><tt>components.rules.om</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules.default">components.rules.default</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.scavi"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/scavi.py" type="text/plain"><tt>components.rules.scavi</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules.default">components.rules.default</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="components.rules.zamil"></a>
+  <a target="code" href="///D:/Documents/tool%20chuy%E1%BB%83n%20%C4%91%E1%BB%95i/ToolChangingFormat/components/rules/zamil.py" type="text/plain"><tt>components.rules.zamil</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#components.rules">components.rules</a>
+ &#8226;   <a href="#components.rules.base">components.rules.base</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#components.rules.default">components.rules.default</a>
 
   </div>
 
@@ -2120,6 +2261,7 @@ imported by:
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#components.common">components.common</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
+ &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
  &#8226;   <a href="#dataclasses">dataclasses</a>
@@ -2296,7 +2438,6 @@ imported by:
  &#8226;   <a href="#components.approval">components.approval</a>
  &#8226;   <a href="#components.common">components.common</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
- &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
@@ -7051,6 +7192,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#components.approval">components.approval</a>
+ &#8226;   <a href="#components.common">components.common</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
  &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
@@ -7171,7 +7313,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#openpyxl.cell">openpyxl.cell</a>
+    <a href="#components.format2_shopping">components.format2_shopping</a>
+ &#8226;   <a href="#openpyxl.cell">openpyxl.cell</a>
  &#8226;   <a href="#openpyxl.worksheet.merge">openpyxl.worksheet.merge</a>
 
   </div>
@@ -10418,6 +10561,7 @@ imported by:
     <a href="#components.approval">components.approval</a>
  &#8226;   <a href="#components.common">components.common</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
+ &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
  &#8226;   <a href="#components.format_bizen_po_export">components.format_bizen_po_export</a>
  &#8226;   <a href="#openpyxl.cell.cell">openpyxl.cell.cell</a>
@@ -11139,7 +11283,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#openpyxl.formatting.formatting">openpyxl.formatting.formatting</a>
+    <a href="#components.format2_shopping">components.format2_shopping</a>
+ &#8226;   <a href="#openpyxl.formatting.formatting">openpyxl.formatting.formatting</a>
  &#8226;   <a href="#openpyxl.worksheet._reader">openpyxl.worksheet._reader</a>
  &#8226;   <a href="#openpyxl.worksheet.datavalidation">openpyxl.worksheet.datavalidation</a>
  &#8226;   <a href="#openpyxl.worksheet.merge">openpyxl.worksheet.merge</a>
@@ -11392,7 +11537,6 @@ imports:
 imported by:
     <a href="#components.approval">components.approval</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
- &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#openpyxl.worksheet._reader">openpyxl.worksheet._reader</a>
  &#8226;   <a href="#openpyxl.worksheet.worksheet">openpyxl.worksheet.worksheet</a>
 
@@ -11437,7 +11581,6 @@ imports:
 imported by:
     <a href="#components.approval">components.approval</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
- &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#openpyxl.worksheet._reader">openpyxl.worksheet._reader</a>
  &#8226;   <a href="#openpyxl.worksheet.worksheet">openpyxl.worksheet.worksheet</a>
 
@@ -12235,6 +12378,7 @@ imported by:
  &#8226;   <a href="#components.approval">components.approval</a>
  &#8226;   <a href="#components.common">components.common</a>
  &#8226;   <a href="#components.format1_a4">components.format1_a4</a>
+ &#8226;   <a href="#components.format2_shopping">components.format2_shopping</a>
  &#8226;   <a href="#components.format_bizen_po">components.format_bizen_po</a>
  &#8226;   <a href="#csv">csv</a>
  &#8226;   <a href="#dataclasses">dataclasses</a>
