@@ -334,7 +334,6 @@ def parse_source_sheet(ws_source, file_path, quantity_mode=None):
     col_map = map_columns(headers, quantity_mode)
     normalized_mode = normalize_quantity_mode(quantity_mode)
     selected_qty_key = "qty_forecast" if normalized_mode == QUANTITY_MODE_FORECAST else "qty_approved"
-    selected_qty_column_present = selected_qty_key in col_map
 
     # Read rows
     raw_rows = []
@@ -342,6 +341,31 @@ def parse_source_sheet(ws_source, file_path, quantity_mode=None):
         row_vals = [ws_source.cell(r, c).value for c in range(1, ws_source.max_column + 1)]
         if any(x is not None for x in row_vals):
             raw_rows.append(row_vals)
+
+    # Một số file có sẵn cả hai cột số lượng nhưng cột được chọn hoàn toàn
+    # trống. Trước đây trường hợp này vẫn khóa vào cột trống, khiến Format 2
+    # xuất ra mẫu không có khối lượng. Chỉ ưu tiên cột đã chọn khi nó thực sự
+    # có dữ liệu; nếu không thì dùng cột số lượng còn lại.
+    if normalized_mode == QUANTITY_MODE_FORECAST:
+        quantity_candidates = ("qty_forecast", "qty", "qty_approved")
+    else:
+        quantity_candidates = ("qty_approved", "qty", "qty_forecast")
+
+    selected_qty_key_in_use = None
+    for candidate in quantity_candidates:
+        col_idx = col_map.get(candidate)
+        if col_idx is None:
+            continue
+        if any(
+            col_idx <= len(row) and row[col_idx - 1] is not None
+            and str(row[col_idx - 1]).strip() != ""
+            for row in raw_rows
+        ):
+            col_map["qty"] = col_idx
+            selected_qty_key_in_use = candidate
+            break
+
+    selected_qty_column_present = selected_qty_key_in_use == selected_qty_key
 
     # Forward fill
     prev_vals = {}
