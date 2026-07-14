@@ -342,6 +342,8 @@ def output_filename_for_format(filename, format_mode):
     stem = Path(input_name).stem
     if format_mode == "format2":
         return f"{stem} - format 2.xlsx"
+    if format_mode == "format2_update":
+        return f"{stem} - format 2 update.xlsx"
     if format_mode == APPROVAL_FORMAT_MODE:
         return f"{stem} - duyet dinh muc.xlsx"
     if format_mode == "bizen_po":

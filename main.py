@@ -37,6 +37,7 @@ from components.format_bizen_po_export import BIZEN_EXPORT_IDENTIFIER, BIZEN_EXP
 from components import (
     process_sheet_format1_a4,
     process_sheet_format2,
+    process_sheet_format2_update,
     process_sheet_approval,
     process_sheet_bizen_po,
     process_sheet_bizen_po_export,
@@ -60,6 +61,7 @@ def format_workbook_bytes(
     format_mode="format1",
     selected_kitchen=None,
     quantity_mode=QUANTITY_MODE_DEFAULT,
+    quantity_file_bytes=None,
 ):
     if not file_bytes:
         raise ValueError("File Excel đang trống.")
@@ -108,6 +110,13 @@ def format_workbook_bytes(
             selected_kitchen,
             quantity_mode,
         )
+    elif format_mode == "format2_update":
+        if not quantity_file_bytes:
+            raise ValueError("Vui lòng chọn thêm bảng tổng hợp số lượng cho Format 2 Update.")
+        quantity_workbook = load_workbook(BytesIO(quantity_file_bytes), data_only=True)
+        quantity_worksheet = ensure_visible_worksheet(quantity_workbook, quantity_workbook.active)
+        workbook = process_sheet_format2_update(worksheet, quantity_worksheet, quantity_mode)
+        quantity_workbook.close()
     elif format_mode == APPROVAL_FORMAT_MODE:
         workbook = process_sheet_approval(worksheet)
     else:
@@ -120,7 +129,7 @@ def format_workbook_bytes(
     return output.getvalue()
 
 
-def parse_multipart_form(headers, body):
+def parse_multipart_form(headers, body, include_sources=False):
     content_type = headers.get("Content-Type", "")
     marker = "boundary="
     if marker not in content_type:
@@ -134,6 +143,8 @@ def parse_multipart_form(headers, body):
     fields = {}
     file_bytes = None
     filename = None
+    quantity_file_bytes = None
+    quantity_filename = None
 
     for raw_part in body.split(delimiter):
         part = raw_part.strip()
@@ -180,9 +191,14 @@ def parse_multipart_form(headers, body):
                 elif "filename" in disposition_params:
                     fname = disposition_params["filename"]
                 filename = safe_filename(fname)
+            elif name == "quantity_file":
+                quantity_file_bytes = val_data
+                quantity_filename = safe_filename(disposition_params.get("filename", "quantity.xlsx"))
         else:
             fields[name] = val_data.decode("utf-8", "ignore").strip()
 
+    if include_sources:
+        return fields, filename, file_bytes, quantity_filename, quantity_file_bytes
     return fields, filename, file_bytes
 
 
@@ -428,18 +444,24 @@ index_html = """<!doctype html>
             <select id="format_mode" name="format_mode">
               <option value="format1" selected>Format 1 (Bảng A4 dọc 13 cột + dòng ngày)</option>
               <option value="format2">Format 2 (Theo mẫu)</option>
+              <option value="format2_update">Format 2 Update (Số lượng từ bảng tổng hợp)</option>
               <option value="duyet_dinh_muc">Duyệt định mức (A4 ngang, gộp món liền kề)</option>
               <option value="bizen_po">BIZEN PO Lưới (Đặt hàng 9 cột)</option>
               <option value="bizen_po_export">BIZEN PO Xuất (Có mẫu)</option>
             </select>
           </div>
           <div class="control-group" id="quantityGroup">
-            <label for="quantity_mode">Số lượng để in</label>
+            <label for="quantity_mode" id="quantityModeLabel">Số lượng để in</label>
             <select id="quantity_mode" name="quantity_mode">
               <option value="approved" selected>Số lượng cô Nga duyệt</option>
               <option value="forecast">Số lượng dự báo</option>
             </select>
           </div>
+        </div>
+        <div class="control-group" id="quantityFileGroup" hidden>
+          <label for="quantityFile">Bảng tổng hợp số lượng</label>
+          <input id="quantityFile" name="quantity_file" type="file" accept=".xlsx,.xlsm">
+          <span class="file-subtitle">Loại số lượng được chọn ở phía trên; thực đơn lấy từ file chính.</span>
         </div>
         <div class="actions">
           <div class="status" id="status">Chưa chọn file</div>
@@ -462,10 +484,19 @@ index_html = """<!doctype html>
     const form = document.querySelector('form');
     const formatMode = document.getElementById('format_mode');
     const quantityGroup = document.getElementById('quantityGroup');
+    const quantityModeLabel = document.getElementById('quantityModeLabel');
+    const quantityFileGroup = document.getElementById('quantityFileGroup');
+    const quantityFile = document.getElementById('quantityFile');
 
     function updateQuantityVisibility() {
-      const usesQuantityMode = ['format1', 'format2'].includes(formatMode.value);
+      const usesQuantityMode = ['format1', 'format2', 'format2_update'].includes(formatMode.value);
       quantityGroup.hidden = !usesQuantityMode;
+      const usesQuantityFile = formatMode.value === 'format2_update';
+      quantityModeLabel.textContent = usesQuantityFile
+        ? 'Chọn số lượng từ bảng tổng hợp'
+        : 'Số lượng để in';
+      quantityFileGroup.hidden = !usesQuantityFile;
+      quantityFile.required = usesQuantityFile;
     }
 
     function updateFileName() {
@@ -478,6 +509,7 @@ index_html = """<!doctype html>
 
     file.addEventListener('change', updateFileName);
     formatMode.addEventListener('change', updateQuantityVisibility);
+    updateQuantityVisibility();
     drop.addEventListener('dragover', event => {
       event.preventDefault();
       drop.classList.add('is-dragover');
@@ -589,7 +621,9 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
                 raise ValueError("File quá lớn. Giới hạn hiện tại là 50 MB.")
 
             body = self.rfile.read(content_length)
-            fields, filename, file_bytes = parse_multipart_form(self.headers, body)
+            fields, filename, file_bytes, quantity_filename, quantity_file_bytes = parse_multipart_form(
+                self.headers, body, include_sources=True
+            )
 
             if not file_bytes:
                 raise ValueError("Vui lòng chọn file Excel trước khi xuất.")
@@ -626,6 +660,7 @@ class BomFormatterHandler(BaseHTTPRequestHandler):
                 date_mode="auto",
                 format_mode=format_opt,
                 quantity_mode=quantity_opt,
+                quantity_file_bytes=quantity_file_bytes,
             )
             download_name = output_filename_for_format(filename, format_opt)
             content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

@@ -11,6 +11,35 @@ from .common import merged_value_lookup, effective_cell_value, input_dir, output
 BIZEN_EXPORT_IDENTIFIER = "BIZEN - CATERING_Xuất PO ra ex"
 BIZEN_EXPORT_FORMAT_MODE = "bizen_po_export"
 
+_DETAIL_HEADERS = (
+    "Mã hàng",
+    "Diễn giải",
+    "Khối lượng",
+    "Đơn vị",
+    "Đơn giá",
+    "Thành tiền",
+    "Tồn kho ban đầu",
+    "Tồn kho mong muốn",
+    "Nơi giao hàng",
+    "Giờ giao hàng",
+)
+
+_COMBINED_HEADERS = (
+    "Mã PO",
+    "Mã hàng",
+    "Mã POT",
+    "Nhà cung cấp",
+    "Diễn giải",
+    "Khối lượng",
+    "Đơn vị",
+    "Đơn giá",
+    "Thành tiền",
+    "Tồn kho ban đầu",
+    "Tồn kho mong muốn",
+    "Nơi giao hàng",
+    "Giờ giao hàng",
+)
+
 # Headers required for detection
 _REQUIRED_HEADERS_ALT_1 = {
     "Ngày",
@@ -121,6 +150,22 @@ def _detect_source_columns(ws):
         "thue_vat": header_map.get("Sum: Thuế VAT") or header_map.get("Thuế VAT") or header_map.get("Tổng Thuế VAT"),
         "thanh_tien_sau_thue": header_map.get("Sum: Thành tiền sau thuế") or header_map.get("Thành tiền sau thuế") or header_map.get("Tổng tiền Sau thuế"),
         "ma_pot": header_map.get("Mã POT") or header_map.get("POT") or header_map.get("Mã PO Temp"),
+        "ton_kho_ban_dau": (
+            header_map.get("Tồn kho ban đầu")
+            or header_map.get("Sum: Tồn kho ban đầu")
+            or header_map.get("Tổng Tồn kho ban đầu")
+            or header_map.get("Tổng tồn kho ban đầu")
+            or header_map.get("Tồn kho đầu kỳ")
+            or header_map.get("Sum: Tồn kho đầu kỳ")
+            or header_map.get("Tổng Tồn kho đầu kỳ")
+            or header_map.get("Tổng tồn kho đầu kỳ")
+        ),
+        "ton_kho_mong_muon": (
+            header_map.get("Tồn kho mong muốn")
+            or header_map.get("Sum: Tồn kho mong muốn")
+            or header_map.get("Tổng Tồn kho mong muốn")
+            or header_map.get("Tổng tồn kho mong muốn")
+        ),
     }
     
     required = ["ma_po", "ma_hang", "dien_giai", "don_vi", "khoi_luong", "don_gia", "thanh_tien"]
@@ -154,6 +199,16 @@ def process_sheet_bizen_po_export(ws):
         noi_giao = effective_cell_value(ws, lookup, r, col_map["noi_giao"])
         gio_giao = effective_cell_value(ws, lookup, r, col_map["gio_giao"])
         ma_pot = effective_cell_value(ws, lookup, r, col_map["ma_pot"]) if col_map.get("ma_pot") else None
+        ton_kho_ban_dau_raw = (
+            effective_cell_value(ws, lookup, r, col_map["ton_kho_ban_dau"])
+            if col_map.get("ton_kho_ban_dau")
+            else None
+        )
+        ton_kho_mong_muon_raw = (
+            effective_cell_value(ws, lookup, r, col_map["ton_kho_mong_muon"])
+            if col_map.get("ton_kho_mong_muon")
+            else None
+        )
         
         # Đọc Thuế VAT và Thành tiền sau thuế
         thue_vat_raw = effective_cell_value(ws, lookup, r, col_map["thue_vat"]) if col_map.get("thue_vat") else 0
@@ -164,6 +219,8 @@ def process_sheet_bizen_po_export(ws):
         thanh_tien = _parse_currency(thanh_tien_raw)
         thue_vat = _parse_number(thue_vat_raw)
         thanh_tien_sau_thue = thanh_tien if thanh_tien_sau_thue_raw is None else _parse_currency(thanh_tien_sau_thue_raw)
+        ton_kho_ban_dau = _parse_number(ton_kho_ban_dau_raw)
+        ton_kho_mong_muon = _parse_number(ton_kho_mong_muon_raw)
         
         grouped_data[ma_po].append({
             "ngay": ngay,
@@ -181,7 +238,9 @@ def process_sheet_bizen_po_export(ws):
             "gio_giao": gio_giao,
             "thue_vat": thue_vat,
             "thanh_tien_sau_thue": thanh_tien_sau_thue,
-            "ma_pot": ma_pot
+            "ma_pot": ma_pot,
+            "ton_kho_ban_dau": ton_kho_ban_dau,
+            "ton_kho_mong_muon": ton_kho_mong_muon,
         })
         
     if not grouped_data:
@@ -283,10 +342,16 @@ def process_sheet_bizen_po_export(ws):
         
         tpl_pot_ws = tpl_wb['POT1']
         _copy_sheet_basics(tpl_pot_ws, po_ws, copy_rows_count=8)
+
+        # Extend the template title to the full width of the enlarged detail table.
+        if any(str(cell_range) == "A2:H2" for cell_range in po_ws.merged_cells.ranges):
+            po_ws.unmerge_cells("A2:H2")
+        po_ws.merge_cells("A2:J2")
         
         # Apply header formatting to detailed PO sheet headers (Row 8)
-        for c in range(1, 9):
+        for c, header in enumerate(_DETAIL_HEADERS, start=1):
             cell = po_ws.cell(row=8, column=c)
+            cell.value = header
             cell.fill = header_fill
             cell.font = header_font
             cell.alignment = align_center
@@ -324,9 +389,9 @@ def process_sheet_bizen_po_export(ws):
         cell_ncc.alignment = Alignment(horizontal="left", vertical="center")
         
         # Merge value cells for metadata
-        po_ws.merge_cells("E4:H4")
-        po_ws.merge_cells("E5:H5")
-        po_ws.merge_cells("E6:H6")
+        po_ws.merge_cells("E4:J4")
+        po_ws.merge_cells("E5:J5")
+        po_ws.merge_cells("E6:J6")
         
         # Write PO detail items
         start_row = 9
@@ -348,6 +413,8 @@ def process_sheet_bizen_po_export(ws):
                 r_data["don_vi"],
                 price,
                 f"=C{r_idx}*E{r_idx}",  # Thành tiền formula
+                r_data["ton_kho_ban_dau"],
+                r_data["ton_kho_mong_muon"],
                 r_data["noi_giao"],
                 r_data["gio_giao"]
             ]
@@ -363,6 +430,8 @@ def process_sheet_bizen_po_export(ws):
                 "don_gia": price,
                 "khach_hang": r_data["khach_hang"],
                 "ca_an": r_data["ca_an"],
+                "ton_kho_ban_dau": r_data["ton_kho_ban_dau"],
+                "ton_kho_mong_muon": r_data["ton_kho_mong_muon"],
                 "noi_giao": r_data["noi_giao"],
                 "gio_giao": r_data["gio_giao"]
             })
@@ -377,14 +446,14 @@ def process_sheet_bizen_po_export(ws):
                 cell.fill = current_fill
                 
                 # Column alignments and formatting
-                if col_idx in {1, 4, 7, 8}:
+                if col_idx in {1, 4, 9, 10}:
                     cell.alignment = align_center
                 elif col_idx == 2:
                     cell.alignment = align_left
-                elif col_idx in {3, 5, 6}:
+                elif col_idx in {3, 5, 6, 7, 8}:
                     cell.alignment = align_right
-                    if col_idx == 3:
-                        if isinstance(qty, float) and not qty.is_integer():
+                    if col_idx in {3, 7, 8}:
+                        if isinstance(val, float) and not val.is_integer():
                             cell.number_format = number_format_decimal
                         else:
                             cell.number_format = number_format_thousands
@@ -432,10 +501,10 @@ def process_sheet_bizen_po_export(ws):
         write_po_total_row(po_ws, N + 3, "Tiền thuế GTGT", f"=F{N+1}*F{N+2}")
         write_po_total_row(po_ws, N + 4, "Tổng tiền thanh toán", f"=F{N+1}+F{N+3}")
         
-        # Add Excel Table (Ctrl+T) for detailed sheet table (A8:H{N})
+        # Add Excel Table (Ctrl+T) for detailed sheet table (A8:J{N})
         from openpyxl.worksheet.table import Table, TableStyleInfo
         table_name = f"POTable_{idx}"
-        tab = Table(displayName=table_name, ref=f"A8:H{N}")
+        tab = Table(displayName=table_name, ref=f"A8:J{N}")
         style = TableStyleInfo(
             name="TableStyleMedium2", 
             showFirstColumn=False,
@@ -447,7 +516,7 @@ def process_sheet_bizen_po_export(ws):
         po_ws.add_table(tab)
         
         # Auto-fit column widths
-        for col_idx in range(1, 9):
+        for col_idx in range(1, len(_DETAIL_HEADERS) + 1):
             max_len = 0
             for row_idx in range(1, N + 1):
                 cell_val = po_ws.cell(row=row_idx, column=col_idx).value
@@ -597,8 +666,13 @@ def process_sheet_bizen_po_export(ws):
         
         # Copy header and layout basics (row 1-6)
         _copy_sheet_basics(tpl_sum_order_ws, sum_order_ws, copy_rows_count=6)
+
+        # Extend the template title to the full width of the enlarged combined table.
+        if any(str(cell_range) == "A2:K2" for cell_range in sum_order_ws.merged_cells.ranges):
+            sum_order_ws.unmerge_cells("A2:K2")
+        sum_order_ws.merge_cells("A2:M2")
         
-        # Write Date at E4 (merged E4:J4)
+        # Write Date at E4 (merged E4:M4)
         if isinstance(ngay_val, datetime.datetime) or ngay_val:
             cell_ngay = sum_order_ws.cell(row=4, column=5, value=ngay_val)
             cell_ngay.font = Font(name="Calibri", size=12, bold=True)
@@ -606,13 +680,14 @@ def process_sheet_bizen_po_export(ws):
             if isinstance(ngay_val, datetime.datetime):
                 cell_ngay.number_format = 'DD/MM/YYYY'
             try:
-                sum_order_ws.merge_cells("E4:J4")
+                sum_order_ws.merge_cells("E4:M4")
             except Exception:
                 pass
                 
         # Format headers at Row 6
-        for c in range(1, 12):
+        for c, header in enumerate(_COMBINED_HEADERS, start=1):
             cell = sum_order_ws.cell(row=6, column=c)
+            cell.value = header
             cell.fill = header_fill
             cell.font = header_font
             cell.alignment = align_center
@@ -632,6 +707,8 @@ def process_sheet_bizen_po_export(ws):
                 item_data["don_vi"],
                 item_data["don_gia"],
                 f"=F{r_idx}*H{r_idx}",  # Thành tiền formula (F is qty, H is price)
+                item_data["ton_kho_ban_dau"],
+                item_data["ton_kho_mong_muon"],
                 item_data["noi_giao"],
                 item_data["gio_giao"]
             ]
@@ -645,15 +722,14 @@ def process_sheet_bizen_po_export(ws):
                 cell.fill = current_fill
                 
                 # Alignments and formats
-                if col_idx in {1, 2, 3, 7, 10, 11}:
+                if col_idx in {1, 2, 3, 7, 12, 13}:
                     cell.alignment = align_center
                 elif col_idx in {4, 5}:
                     cell.alignment = align_left
-                elif col_idx in {6, 8, 9}:
+                elif col_idx in {6, 8, 9, 10, 11}:
                     cell.alignment = align_right
-                    if col_idx == 6:
-                        qty_val = item_data["khoi_luong"]
-                        if isinstance(qty_val, float) and not qty_val.is_integer():
+                    if col_idx in {6, 10, 11}:
+                        if isinstance(val, float) and not val.is_integer():
                             cell.number_format = number_format_decimal
                         else:
                             cell.number_format = number_format_thousands
@@ -691,10 +767,10 @@ def process_sheet_bizen_po_export(ws):
         write_combined_total_row(sum_order_ws, N_comb + 3, "Tiền thuế GTGT", f"=I{N_comb+1}*I{N_comb+2}")
         write_combined_total_row(sum_order_ws, N_comb + 4, "Tổng tiền thanh toán", f"=I{N_comb+1}+I{N_comb+3}")
         
-        # Add Excel Table (Ctrl+T) for combined sheet table (A6:K{N_comb})
+        # Add Excel Table (Ctrl+T) for combined sheet table (A6:M{N_comb})
         from openpyxl.worksheet.table import Table, TableStyleInfo
         table_name = "CombinedOrderTable"
-        tab = Table(displayName=table_name, ref=f"A6:K{N_comb}")
+        tab = Table(displayName=table_name, ref=f"A6:M{N_comb}")
         style = TableStyleInfo(
             name="TableStyleMedium2", 
             showFirstColumn=False,
@@ -709,7 +785,7 @@ def process_sheet_bizen_po_export(ws):
         sum_order_ws.freeze_panes = "A7"
         
         # Auto-fit columns of combined sheet
-        for col_idx in range(1, 12):
+        for col_idx in range(1, len(_COMBINED_HEADERS) + 1):
             max_len = 0
             for row_idx in range(1, N_comb + 1):
                 cell_val = sum_order_ws.cell(row=row_idx, column=col_idx).value
@@ -721,7 +797,7 @@ def process_sheet_bizen_po_export(ws):
                     if display_len > max_len:
                         max_len = display_len
             adjusted_width = max_len + 4
-            if col_idx in [4, 5, 10]:
+            if col_idx in [4, 5, 12]:
                 adjusted_width = max(20, min(adjusted_width, 60))
             else:
                 adjusted_width = max(10, min(adjusted_width, 40))

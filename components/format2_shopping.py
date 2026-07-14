@@ -461,20 +461,29 @@ def format_group_dishes(cust, r_list):
                 has_kl_mua = kl_raw not in [None, ""]
                 kl_mua = kl_raw if has_kl_mua else None
 
+                if not has_kl_mua and r.get("_recalculate_weight") and qty and dm_val:
+                    target_unit = dvt_mua or dm_unit
+                    kl_mua = convert_amount_between_units(qty * dm_val, dm_unit, target_unit)
+                    has_kl_mua = kl_mua not in [None, ""]
+
                 if qty_blank and not selected_qty_blank:
                     qty = infer_qty_from_weight(kl_mua, dvt_mua, dm_val, dm_unit) or 0.0
 
-                nvl_dinh_muc[nvl] = (dm_val, dm_unit, dvt_mua)
+                nvl_dinh_muc[nvl] = (dm_val, dm_unit, dvt_mua or dm_unit)
                 if has_kl_mua:
                     site_nvl_totals[site][nvl] += kl_mua
                     nvl_has_weight[nvl] = True
 
-            if qty:
+            if qty or r.get("_site_split"):
                 site_qty_map[site] = max(site_qty_map[site], qty)
 
         # 1. Format Quantity
         if is_multi_site:
-            qty_val = "\n".join(f"{s} - {format_number_clean(site_qty_map[s])}" for s in sorted_sites if site_qty_map[s] > 0)
+            qty_val = "\n".join(
+                f"{s} - {format_number_clean(site_qty_map[s])}"
+                for s in sorted_sites
+                if s in site_qty_map
+            )
         else:
             total_qty = sum(site_qty_map.values())
             qty_val = format_number_clean(total_qty) if total_qty > 0 else ""
@@ -1876,7 +1885,7 @@ def populate_template_workbook(all_parsed_rows, selected_kitchen=None):
         # Configure A4 Portrait printing with fit-to-width
         ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT
         ws.page_setup.paperSize = ws.PAPERSIZE_A4
-        ws.page_setup.fitToPage = True
+        ws.sheet_properties.pageSetUpPr.fitToPage = True
         ws.page_setup.fitToWidth = 1
         ws.page_setup.fitToHeight = 0
 
